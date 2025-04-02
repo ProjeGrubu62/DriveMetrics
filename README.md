@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # DriveMetrics - Araç Performans Analiz Sistemi
 
 ## Proje Hakkında
@@ -110,3 +111,6 @@ npm run dev
 
 ## Lisans
 Bu proje MIT lisansı altında lisanslanmıştır. Detaylı bilgi için [LICENSE](LICENSE) dosyasını inceleyebilirsiniz.
+=======
+# DriveMetrics
+>>>>>>> cd5b3f9191e6099b187266f9909d0862ef093776
