@@ -98,9 +98,10 @@ export default function ManualDataEntry() {
 
       // Save the vehicle image before navigation
       localStorage.setItem('selectedVehicleImage', vehicleImage);
+      
+      // Veri giriş yöntemi seçimi için drive-setup sayfasına yönlendir
+      window.location.href = '/drive-setup';
       console.log('Saved image URL:', vehicleImage); // Debug log
-
-      window.location.href = '/analysis';
     } catch (error) {
       console.error('Hata:', error);
       alert('Veri gönderilirken bir hata oluştu.');
