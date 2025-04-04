@@ -1,9 +1,9 @@
 'use client'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import Image from 'next/image'
 // Fix the import paths - remove duplicate and use correct path
 import { generateDriveData } from '../../utils/dataGenerator'
-import { DriveData, Vehicle } from '../../types'
+import { DriveData, Vehicle } from '../types'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,6 +17,7 @@ import {
 } from 'chart.js'
 import { Line, Doughnut } from 'react-chartjs-2'
 import DriveDataEntry from '../components/DriveDataEntry';
+import DriveAnalysisReport from '../components/DriveAnalysisReport';
 import { ManualDriveData } from '../types';
 
 ChartJS.register(
@@ -37,6 +38,7 @@ export default function Analysis() {
   const [driveData, setDriveData] = useState<DriveData | null>(null)
   const [lastUpdate, setLastUpdate] = useState(new Date())
   const [dataMode, setDataMode] = useState<'auto' | 'manual'>('auto');
+  const [error, setError] = useState<string | null>(null);
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleManualDataSubmit = async (data: ManualDriveData) => {
@@ -96,7 +98,49 @@ export default function Analysis() {
   }
 
   useEffect(() => {
-    updateData()
+    // Önce localStorage'dan veri yüklemeyi deneyelim
+    try {
+      const savedDriveData = localStorage.getItem('driveData');
+      if (savedDriveData) {
+        console.log("localStorage'dan veri yükleniyor...");
+        const parsedData = JSON.parse(savedDriveData);
+        
+        // Veri formatını kontrol edelim
+        if (parsedData && typeof parsedData === 'object') {
+          // Eksik alanları tamamlayalım
+          if (!parsedData.id) parsedData.id = Date.now().toString();
+          if (!parsedData.vehicleId) parsedData.vehicleId = '1';
+          if (!parsedData.gearShifts) parsedData.gearShifts = [];
+          if (!parsedData.speedChanges) parsedData.speedChanges = [];
+          if (!parsedData.brakeUsages) parsedData.brakeUsages = [];
+          if (!parsedData.clutchUsages) parsedData.clutchUsages = [];
+          if (!parsedData.stopEvents) parsedData.stopEvents = [];
+          if (!parsedData.stallEvents) parsedData.stallEvents = [];
+          if (!parsedData.drivingStyle) parsedData.drivingStyle = 'normal';
+          if (!parsedData.clutchHealth) parsedData.clutchHealth = 85;
+          
+          setDriveData(parsedData);
+          setLastUpdate(new Date());
+          console.log('Veri başarıyla yüklendi:', parsedData);
+          
+          // localStorage'dan veriyi temizleyelim ki bir sonraki ziyarette tekrar kullanılmasın
+          localStorage.removeItem('driveData');
+          setError(null);
+        } else {
+          console.error('Geçersiz veri formatı:', parsedData);
+          setError('Geçersiz veri formatı. Yeni veri üretiliyor...');
+          updateData();
+        }
+      } else {
+        console.log("localStorage'da veri bulunamadı, yeni veri üretiliyor...");
+        updateData();
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      setError('Veri yükleme hatası. Yeni veri üretiliyor...');
+      updateData();
+    }
+    
     return () => {
       if (updateIntervalRef.current) {
         clearInterval(updateIntervalRef.current)
@@ -120,25 +164,22 @@ export default function Analysis() {
     loadVehicleImage();
   }, []);
 
-  const vitesData = {
+  const vitesData = useMemo(() => ({
     labels: ['1. Vites', '2. Vites', '3. Vites', '4. Vites', '5. Vites'],
     datasets: [{
       label: 'Vites Kullanım Süresi (dakika)',
       data: driveData ? driveData.gearShifts.reduce((acc, shift) => {
-        // Ensure absolute minimum time for 1st gear (at least 2 seconds per start)
-        const startCount = Math.ceil(driveData.totalDistance / 5) // Assume one start every ~5km
-        if (acc[0] === 0) acc[0] = Math.max(startCount * (2/60), // Convert seconds to minutes
-                                           Math.floor(driveData.gearShifts.length * 0.15))
-        
+        const startCount = Math.ceil(driveData.totalDistance / 5)
+        if (acc[0] === 0) acc[0] = Math.max(startCount * (2/60), Math.floor(driveData.gearShifts.length * 0.15))
         acc[shift.fromGear - 1] = (acc[shift.fromGear - 1] || 0) + 1
         return acc
       }, Array(5).fill(0)) : [0, 0, 0, 0, 0],
       borderColor: 'rgb(75, 192, 192)',
       tension: 0.1
     }]
-  }
+  }), [driveData])
 
-  const hizData = {
+  const hizData = useMemo(() => ({
     labels: ['0-20', '20-40', '40-60', '60-80', '80+'],
     datasets: [{
       label: 'Hız Dağılımı (%)',
@@ -155,9 +196,9 @@ export default function Analysis() {
         'rgba(153, 102, 255, 0.5)'
       ]
     }]
-  }
+  }), [driveData])
 
-  const yakitData = {
+  const yakitData = useMemo(() => ({
     labels: ['0-10km', '10-20km', '20-30km', '30-40km', '40-50km'],
     datasets: [{
       label: 'Yakıt Tüketimi (L/100km)',
@@ -171,9 +212,9 @@ export default function Analysis() {
       borderColor: 'rgb(255, 99, 132)',
       tension: 0.1
     }]
-  }
+  }), [driveData])
 
-  const agirlikData = {
+  const agirlikData = useMemo(() => ({
     labels: ['Yakıt Etkisi', 'Süspansiyon Etkisi', 'Performans Etkisi'],
     datasets: [{
       data: driveData ? [
@@ -187,9 +228,9 @@ export default function Analysis() {
         'rgba(255, 206, 86, 0.5)'
       ]
     }]
-  }
+  }), [driveData])
 
-  const frenKullanimData = {
+  const frenKullanimData = useMemo(() => ({
     labels: ['0-5km', '5-10km', '10-15km', '15-20km', '20-25km'],
     datasets: [{
       label: 'Fren Kullanım Sıklığı',
@@ -201,9 +242,9 @@ export default function Analysis() {
       borderColor: 'rgb(255, 99, 132)',
       tension: 0.1
     }]
-  }
+  }), [driveData])
 
-  const frenDurumData = {
+  const frenDurumData = useMemo(() => ({
     labels: ['Balata Aşınması', 'Disk Aşınması', 'El Freni Kullanımı'],
     datasets: [{
       data: driveData ? [
@@ -217,9 +258,9 @@ export default function Analysis() {
         'rgba(255, 206, 86, 0.5)'
       ]
     }]
-  }
+  }), [driveData])
 
-  const hizlanmaData = {
+  const hizlanmaData = useMemo(() => ({
     labels: ['0-5km', '5-10km', '10-15km', '15-20km', '20-25km'],
     datasets: [
       {
@@ -247,9 +288,9 @@ export default function Analysis() {
         tension: 0.1
       }
     ]
-  }
+  }), [driveData])
 
-  const surusTarziData = {
+  const surusTarziData = useMemo(() => ({
     labels: ['Ekonomik', 'Normal', 'Sportif'],
     datasets: [{
       data: driveData ? [
@@ -263,10 +304,10 @@ export default function Analysis() {
         'rgba(255, 99, 132, 0.5)'
       ]
     }]
-  }
+  }), [driveData])
 
   // Add new clutch data
-  const clutchUsageData = {
+  const clutchUsageData = useMemo(() => ({
     labels: ['1. Vites', '2. Vites', '3. Vites', '4. Vites', '5. Vites'],
     datasets: [{
       label: 'Debriyaj Kullanım Süresi (ms)',
@@ -277,9 +318,9 @@ export default function Analysis() {
       borderColor: 'rgb(153, 102, 255)',
       tension: 0.1
     }]
-  };
+  }), [driveData]);
 
-  const clutchHealthData = {
+  const clutchHealthData = useMemo(() => ({
     labels: ['Sağlıklı', 'Aşınma', 'Kritik'],
     datasets: [{
       data: driveData ? [
@@ -293,14 +334,14 @@ export default function Analysis() {
         'rgba(255, 99, 132, 0.5)'
       ]
     }]
-  };
+  }), [driveData]);
 
-  const clutchRecommendations = driveData ? [
+  const clutchRecommendations = useMemo(() => driveData ? [
     driveData.clutchHealth < 70 ? 'Debriyaj bakımı önerilir' : null,
     driveData.clutchUsages.some(u => u.duration > 3000) ? 'Debriyajda uzun süreli bekleme tespit edildi' : null,
     driveData.clutchUsages.filter(u => u.isHardRelease).length > 5 ? 'Sert debriyaj bırakmaları azaltılmalı' : null,
     driveData.clutchUsages.filter(u => u.isSlipping).length > 3 ? 'Debriyaj kaydırması tespit edildi' : null,
-  ].filter(Boolean) : [];
+  ].filter(Boolean) : [], [driveData]);
 
   return (
     <main className="min-h-screen p-8">
@@ -331,6 +372,12 @@ export default function Analysis() {
             </button>
           </div>
         </div>
+        
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+            <div className="text-sm text-red-700">{error}</div>
+          </div>
+        )}
 
         <div className="flex space-x-4 mb-8">
           <button
@@ -515,6 +562,27 @@ export default function Analysis() {
               </div>
             </div>
           )}
+
+          <DriveAnalysisReport driveData={driveData as import('../../types').DriveData} analysisResult={{
+            overallScore: 85,
+            categoryScores: {
+              gearUsage: driveData ? Math.min(100, 100 - (driveData.clutchUsages.filter(u => u.isHardRelease).length * 5)) : 0,
+              brakeUsage: driveData ? Math.min(100, 100 - (driveData.brakeUsages.filter(b => b.isEmergency).length * 10)) : 0,
+              speedManagement: driveData ? Math.min(100, 100 - (driveData.speedChanges.filter(s => s.isSudden).length * 5)) : 0,
+              fuelEfficiency: driveData ? Math.min(100, 100 - ((driveData.fuelConsumption / driveData.totalDistance * 100 - 5) * 10)) : 0,
+              safetyScore: driveData ? driveData.clutchHealth : 0
+            },
+            warnings: driveData ? [
+              ...(driveData.clutchUsages.filter(u => u.isHardRelease).length > 2 ? ['Sert debriyaj bırakmaları tespit edildi'] : []),
+              ...(driveData.brakeUsages.filter(b => b.isEmergency).length > 1 ? ['Ani fren kullanımları mevcut'] : []),
+              ...(driveData.speedChanges.filter(s => s.isSudden).length > 3 ? ['Ani hızlanmalar tespit edildi'] : [])
+            ] : [],
+            recommendations: driveData ? [
+              'Vites geçişlerinde debriyajı daha yumuşak kullanın',
+              'Takip mesafesini koruyarak ani fren ihtiyacını azaltın',
+              'Ekonomik sürüş için sabit hızda gitmeye özen gösterin'
+            ] : []
+          }} />
 
           <div className="mb-8">
             <div className="flex space-x-4">

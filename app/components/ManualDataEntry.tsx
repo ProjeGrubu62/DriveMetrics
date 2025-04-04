@@ -1,9 +1,17 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { validateManualDriveData } from '../utils/validation'
 
 interface ManualDriveData {
-  totalTime: number;
+  driverSeatTime: {
+    start: number;  // Unix timestamp
+    end: number;    // Unix timestamp
+  };
+  engineTime: {
+    start: number;  // Unix timestamp
+    end: number;    // Unix timestamp
+  };
   gearTimes: {
     first: number;
     second: number;
@@ -11,15 +19,32 @@ interface ManualDriveData {
     fourth: number;
     fifth: number;
   };
+  stops: {
+    count: number;
+    totalDuration: number;  // dakika cinsinden
+    stallCount: number;     // istop sayısı
+  };
   averageSpeed: number;
   maxSpeed: number;
   distance: number;
   fuelUsed: number;
+  weatherConditions: {
+    temperature: number;
+    weather: 'sunny' | 'rainy' | 'snowy' | 'cloudy';
+    roadCondition: 'dry' | 'wet' | 'icy' | 'snowy';
+  };
 }
 
 export default function ManualDataEntry({ onDataSubmit }: { onDataSubmit: (data: ManualDriveData) => void }) {
   const [formData, setFormData] = useState<ManualDriveData>({
-    totalTime: 0,
+    driverSeatTime: {
+      start: Date.now(),
+      end: Date.now()
+    },
+    engineTime: {
+      start: Date.now(),
+      end: Date.now()
+    },
     gearTimes: {
       first: 0,
       second: 0,
@@ -27,12 +52,23 @@ export default function ManualDataEntry({ onDataSubmit }: { onDataSubmit: (data:
       fourth: 0,
       fifth: 0
     },
+    stops: {
+      count: 0,
+      totalDuration: 0,
+      stallCount: 0
+    },
     averageSpeed: 0,
     maxSpeed: 0,
     distance: 0,
-    fuelUsed: 0
+    fuelUsed: 0,
+    weatherConditions: {
+      temperature: 20,
+      weather: 'sunny',
+      roadCondition: 'dry'
+    }
   });
   const [errors, setErrors] = useState<string[]>([]);
+  const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +80,9 @@ export default function ManualDataEntry({ onDataSubmit }: { onDataSubmit: (data:
     }
     
     setErrors([]);
-    onDataSubmit(formData);
+    onDataSubmit(formData); // Call onDataSubmit with formData
+    // Veri girişi tamamlandığında analiz sayfasına yönlendir
+    router.push('/analysis');
   };
 
   return (
@@ -62,15 +100,41 @@ export default function ManualDataEntry({ onDataSubmit }: { onDataSubmit: (data:
       
       <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded-lg shadow">
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Total Journey Time (minutes)
-            <input
-              type="number"
-              value={formData.totalTime}
-              onChange={(e) => setFormData({...formData, totalTime: Number(e.target.value)})}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-            />
-          </label>
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">Sürüş Zamanları</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Koltuğa Oturma Zamanı
+                <input
+                  type="datetime-local"
+                  value={new Date(formData.driverSeatTime.start).toISOString().slice(0, 16)}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    driverSeatTime: {
+                      ...formData.driverSeatTime,
+                      start: new Date(e.target.value).getTime()
+                    }
+                  })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                />
+              </label>
+              <label className="block text-sm font-medium text-gray-700">
+                Koltuktan Kalkma Zamanı
+                <input
+                  type="datetime-local"
+                  value={new Date(formData.driverSeatTime.end).toISOString().slice(0, 16)}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    driverSeatTime: {
+                      ...formData.driverSeatTime,
+                      end: new Date(e.target.value).getTime()
+                    }
+                  })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                />
+              </label>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -134,6 +198,116 @@ export default function ManualDataEntry({ onDataSubmit }: { onDataSubmit: (data:
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
             />
           </label>
+
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">Duraksamalar ve İstop</h3>
+            <div className="grid grid-cols-3 gap-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Duraksama Sayısı
+                <input
+                  type="number"
+                  value={formData.stops.count}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    stops: {
+                      ...formData.stops,
+                      count: Number(e.target.value)
+                    }
+                  })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                />
+              </label>
+              <label className="block text-sm font-medium text-gray-700">
+                Toplam Duraksama Süresi (dk)
+                <input
+                  type="number"
+                  value={formData.stops.totalDuration}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    stops: {
+                      ...formData.stops,
+                      totalDuration: Number(e.target.value)
+                    }
+                  })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                />
+              </label>
+              <label className="block text-sm font-medium text-gray-700">
+                İstop Sayısı
+                <input
+                  type="number"
+                  value={formData.stops.stallCount}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    stops: {
+                      ...formData.stops,
+                      stallCount: Number(e.target.value)
+                    }
+                  })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">Hava ve Yol Koşulları</h3>
+            <div className="grid grid-cols-3 gap-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Sıcaklık (°C)
+                <input
+                  type="number"
+                  value={formData.weatherConditions.temperature}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    weatherConditions: {
+                      ...formData.weatherConditions,
+                      temperature: Number(e.target.value)
+                    }
+                  })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                />
+              </label>
+              <label className="block text-sm font-medium text-gray-700">
+                Hava Durumu
+                <select
+                  value={formData.weatherConditions.weather}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    weatherConditions: {
+                      ...formData.weatherConditions,
+                      weather: e.target.value as 'sunny' | 'rainy' | 'snowy' | 'cloudy'
+                    }
+                  })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                >
+                  <option value="sunny">Güneşli</option>
+                  <option value="rainy">Yağmurlu</option>
+                  <option value="snowy">Karlı</option>
+                  <option value="cloudy">Bulutlu</option>
+                </select>
+              </label>
+              <label className="block text-sm font-medium text-gray-700">
+                Yol Durumu
+                <select
+                  value={formData.weatherConditions.roadCondition}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    weatherConditions: {
+                      ...formData.weatherConditions,
+                      roadCondition: e.target.value as 'dry' | 'wet' | 'icy' | 'snowy'
+                    }
+                  })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                >
+                  <option value="dry">Kuru</option>
+                  <option value="wet">Islak</option>
+                  <option value="icy">Buzlu</option>
+                  <option value="snowy">Karlı</option>
+                </select>
+              </label>
+            </div>
+          </div>
         </div>
 
         <button

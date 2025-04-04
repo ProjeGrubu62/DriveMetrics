@@ -65,10 +65,13 @@ const generateSpeedChange = (timestamp: number): SpeedChange => {
 // Tam bir sürüş verisi üretme
 export const generateDriveData = (vehicle: Vehicle, duration: number = 3600): DriveData => {
   const startTime = Date.now();
+  const endTime = startTime + (duration * 1000);
   const gearShifts: GearShift[] = [];
   const brakeUsages: BrakeUsage[] = [];
   const speedChanges: SpeedChange[] = [];
   const clutchUsages: ClutchUsage[] = [];
+  const stopEvents = [];
+  const stallEvents = [];
   
   // Her 5 dakikada bir veri üret
   for (let i = 0; i < duration; i += 300) {
@@ -87,17 +90,30 @@ export const generateDriveData = (vehicle: Vehicle, duration: number = 3600): Dr
   return {
     id: Math.random().toString(36).substr(2, 9),
     vehicleId: vehicle.id,
-    startTime,
-    endTime: startTime + duration,
+    driverSeatTime: {
+      start: startTime,
+      end: endTime
+    },
+    engineTime: {
+      start: startTime + 5000,
+      end: endTime - 3000
+    },
     totalDistance: random(10, 100),
     gearShifts,
     brakeUsages,
     speedChanges,
     clutchUsages,
+    stopEvents,
+    stallEvents,
     fuelConsumption: random(5, 15),
     averageSpeed: random(30, 90),
     maxSpeed: random(90, 150),
     drivingStyle,
-    clutchHealth: random(70, 100)  // Assuming relatively healthy clutch
+    clutchHealth: random(70, 100),
+    weatherConditions: {
+      temperature: 20 + random(0, 10),
+      weather: ['sunny', 'rainy', 'snowy', 'cloudy'][Math.floor(random(0, 4))] as 'sunny' | 'rainy' | 'snowy' | 'cloudy',
+      roadCondition: ['dry', 'wet', 'icy', 'snowy'][Math.floor(random(0, 4))] as 'dry' | 'wet' | 'icy' | 'snowy'
+    }
   };
 };
