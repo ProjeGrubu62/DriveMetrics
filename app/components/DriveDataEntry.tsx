@@ -1,25 +1,18 @@
 'use client'
 import { useState } from 'react'
 import { validateManualDriveData } from '../utils/validation'
+import { ManualDriveData } from '../types'
 
-interface ManualDriveData {
-  totalTime: number;
-  gearTimes: {
-    first: number;
-    second: number;
-    third: number;
-    fourth: number;
-    fifth: number;
-  };
-  averageSpeed: number;
-  maxSpeed: number;
-  distance: number;
-  fuelUsed: number;
-}
-
-export default function ManualDataEntry({ onDataSubmit }: { onDataSubmit: (data: ManualDriveData) => void }) {
+export default function DriveDataEntry({ onDataSubmit }: { onDataSubmit: (data: ManualDriveData) => void }) {
   const [formData, setFormData] = useState<ManualDriveData>({
-    totalTime: 0,
+    driverSeatTime: {
+      start: Date.now(),
+      end: Date.now()
+    },
+    engineTime: {
+      start: Date.now(),
+      end: Date.now()
+    },
     gearTimes: {
       first: 0,
       second: 0,
@@ -27,10 +20,28 @@ export default function ManualDataEntry({ onDataSubmit }: { onDataSubmit: (data:
       fourth: 0,
       fifth: 0
     },
+    stops: {
+      count: 0,
+      totalDuration: 0,
+      stallCount: 0
+    },
     averageSpeed: 0,
     maxSpeed: 0,
     distance: 0,
-    fuelUsed: 0
+    fuelUsed: 0,
+    weatherConditions: {
+      temperature: 20,
+      weather: 'sunny',
+      roadCondition: 'dry'
+    },
+    gearShifts: [],
+    speedChanges: [],
+    brakeUsages: [],
+    clutchUsages: [],
+    stopEvents: [],
+    stallEvents: [],
+    drivingStyle: 'normal',
+    clutchHealth: 100
   });
   const [errors, setErrors] = useState<string[]>([]);
 
