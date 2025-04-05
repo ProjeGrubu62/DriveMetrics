@@ -2,38 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { validateManualDriveData } from '../utils/validation'
-
-interface ManualDriveData {
-  driverSeatTime: {
-    start: number;  // Unix timestamp
-    end: number;    // Unix timestamp
-  };
-  engineTime: {
-    start: number;  // Unix timestamp
-    end: number;    // Unix timestamp
-  };
-  gearTimes: {
-    first: number;
-    second: number;
-    third: number;
-    fourth: number;
-    fifth: number;
-  };
-  stops: {
-    count: number;
-    totalDuration: number;  // dakika cinsinden
-    stallCount: number;     // istop sayısı
-  };
-  averageSpeed: number;
-  maxSpeed: number;
-  distance: number;
-  fuelUsed: number;
-  weatherConditions: {
-    temperature: number;
-    weather: 'sunny' | 'rainy' | 'snowy' | 'cloudy';
-    roadCondition: 'dry' | 'wet' | 'icy' | 'snowy';
-  };
-}
+import { ManualDriveData } from '../types'
 
 export default function ManualDataEntry({ onDataSubmit }: { onDataSubmit: (data: ManualDriveData) => void }) {
   const [formData, setFormData] = useState<ManualDriveData>({

@@ -20,6 +20,9 @@
 - Grafik gösterimleri iyileştirildi
 - Sekme yapısı ile kolay gezinme sağlandı
 - Araç görseli entegrasyonu eklendi
+- Sürüş verileri özeti için tablo formatında görünüm eklendi
+- Sürüş süresi hesaplama mantığı düzeltildi
+- Veri görselleştirme ve raporlama iyileştirmeleri yapıldı
 
 ### Performans Optimizasyonları
 - useMemo kullanılarak gereksiz render'lar engellendi

@@ -31,6 +31,7 @@ export default function DriveAnalysisReport({ driveData, analysisResult }: Drive
   ];
 
   const formatDuration = useMemo(() => (seconds: number): string => {
+    if (!seconds) return '0s 0dk';
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -38,13 +39,19 @@ export default function DriveAnalysisReport({ driveData, analysisResult }: Drive
   }, []);
 
   const formatDateTime = useMemo(() => (timestamp: number): string => {
-    return new Intl.DateTimeFormat('tr-TR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(timestamp));
+    if (!timestamp) return '-';
+    try {
+      return new Intl.DateTimeFormat('tr-TR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(new Date(timestamp));
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return '-';
+    }
   }, []);
 
   const getScoreColor = useMemo(() => (score: number): string => {
@@ -57,6 +64,10 @@ export default function DriveAnalysisReport({ driveData, analysisResult }: Drive
     return () => {
       if (!driveData) return null;
       
+      const firstGearShift = driveData.gearShifts?.[0] || { timestamp: 0 };
+      const lastGearShift = driveData.gearShifts?.[driveData.gearShifts?.length - 1] || { timestamp: 0 };
+      const driveDuration = Math.max(0, lastGearShift.timestamp - firstGearShift.timestamp);
+      
       return (
         <div className="space-y-6">
           <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
@@ -68,6 +79,81 @@ export default function DriveAnalysisReport({ driveData, analysisResult }: Drive
               {analysisResult.overallScore >= 90 ? '🌟 Mükemmel sürüş!' :
                analysisResult.overallScore >= 70 ? '👍 İyi gidiyorsun!' :
                '💪 Gelişime açık'}
+            </div>
+          </div>
+
+          {/* Tablo formatında veri özeti */}
+          <div className="overflow-hidden bg-white shadow-md rounded-lg">
+            <h3 className="text-lg font-semibold p-4 bg-gray-50 border-b">Sürüş Verileri Özeti</h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parametre</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Değer</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detay</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Sürüş Süresi</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatDuration(driveDuration)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatDateTime(firstGearShift.timestamp)} - {formatDateTime(lastGearShift.timestamp)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Mesafe</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{driveData.totalDistance.toFixed(1)} km</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Toplam yol</td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Yakıt Tüketimi</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{driveData.fuelConsumption.toFixed(1)} L</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{(driveData.fuelConsumption / driveData.totalDistance * 100).toFixed(1)} L/100km</td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Hız</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Ort: {driveData.averageSpeed} km/h</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Max: {driveData.maxSpeed} km/h</td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Vites Kullanımı</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{driveData.gearShifts.length} değişim</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      1: {driveData.gearTimes.first}dk, 
+                      2: {driveData.gearTimes.second}dk, 
+                      3: {driveData.gearTimes.third}dk, 
+                      4: {driveData.gearTimes.fourth}dk, 
+                      5: {driveData.gearTimes.fifth}dk
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Duruşlar</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{driveData.speedChanges.filter(change => change.toSpeed === 0).length} kez</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Toplam: {driveData.stops?.totalDuration || 0} dk</td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Debriyaj Sağlığı</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{driveData.clutchHealth}%</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {driveData.clutchUsages.filter(usage => usage.isHardRelease).length} sert bırakma, 
+                      {driveData.clutchUsages.filter(usage => usage.isSlipping).length} kaydırma
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Sürüş Stili</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {driveData.drivingStyle === 'economic' ? 'Ekonomik' : driveData.drivingStyle === 'sporty' ? 'Sportif' : 'Normal'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {analysisResult.categoryScores.fuelEfficiency.toFixed(0)}/100 yakıt verimliliği
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
