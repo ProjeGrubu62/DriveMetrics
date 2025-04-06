@@ -1,9 +1,22 @@
 export interface User {
   id: string;
   email: string;
+  password: string;
   name: string;
+  surname: string;
+  role: 'user' | 'admin';
+  isActive: boolean;
   createdAt: number;
   lastLoginAt: number;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterData extends Omit<User, 'id' | 'createdAt' | 'lastLoginAt' | 'role' | 'isActive'> {
+  confirmPassword: string;
 }
 
 export interface UserProfile {
