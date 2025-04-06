@@ -41,13 +41,15 @@ export default function DriveAnalysisReport({ driveData, analysisResult }: Drive
   const formatDateTime = useMemo(() => (timestamp: number): string => {
     if (!timestamp) return '-';
     try {
-      return new Intl.DateTimeFormat('tr-TR', {
+      const date = new Date(timestamp);
+      const options = {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-      }).format(new Date(timestamp));
+      } as const;
+      return new Intl.DateTimeFormat('tr-TR', options).format(date);
     } catch (error) {
       console.error('Date formatting error:', error);
       return '-';
@@ -62,11 +64,23 @@ export default function DriveAnalysisReport({ driveData, analysisResult }: Drive
 
   const renderOverview = useMemo(() => {
     return () => {
-      if (!driveData) return null;
+      if (!driveData || !driveData.gearShifts) return null;
       
-      const firstGearShift = driveData.gearShifts?.[0] || { timestamp: 0 };
-      const lastGearShift = driveData.gearShifts?.[driveData.gearShifts?.length - 1] || { timestamp: 0 };
+      const firstGearShift = driveData.gearShifts[0] || { timestamp: 0 };
+      const lastGearShift = driveData.gearShifts[driveData.gearShifts.length - 1] || { timestamp: 0 };
       const driveDuration = Math.max(0, lastGearShift.timestamp - firstGearShift.timestamp);
+      
+      // Varsayılan gearTimes değerlerini tanımla
+      const defaultGearTimes = {
+        first: 0,
+        second: 0,
+        third: 0,
+        fourth: 0,
+        fifth: 0
+      };
+      
+      // gearTimes için null kontrolü ekle
+      const gearTimes = driveData.gearTimes || defaultGearTimes;
       
       return (
         <div className="space-y-6">
@@ -123,24 +137,24 @@ export default function DriveAnalysisReport({ driveData, analysisResult }: Drive
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Vites Kullanımı</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{driveData.gearShifts.length} değişim</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      1: {driveData.gearTimes.first}dk, 
-                      2: {driveData.gearTimes.second}dk, 
-                      3: {driveData.gearTimes.third}dk, 
-                      4: {driveData.gearTimes.fourth}dk, 
-                      5: {driveData.gearTimes.fifth}dk
+                      1: {gearTimes.first}dk, 
+                      2: {gearTimes.second}dk, 
+                      3: {gearTimes.third}dk, 
+                      4: {gearTimes.fourth}dk, 
+                      5: {gearTimes.fifth}dk
                     </td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Duruşlar</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{driveData.speedChanges.filter(change => change.toSpeed === 0).length} kez</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Toplam: {driveData.stops?.totalDuration || 0} dk</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Toplam: {driveData.speedChanges?.filter(change => change.toSpeed === 0).reduce((acc, curr) => acc + (curr.duration || 0), 0) || 0} dk</td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Debriyaj Sağlığı</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{driveData.clutchHealth}%</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{driveData.clutchHealth || 0}%</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {driveData.clutchUsages.filter(usage => usage.isHardRelease).length} sert bırakma, 
-                      {driveData.clutchUsages.filter(usage => usage.isSlipping).length} kaydırma
+                      {(driveData.clutchUsages || []).filter(usage => usage.isHardRelease).length} sert bırakma, 
+                      {(driveData.clutchUsages || []).filter(usage => usage.isSlipping).length} kaydırma
                     </td>
                   </tr>
                   <tr>

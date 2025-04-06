@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { signIn } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -9,32 +12,45 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
+    if (!email || !password) {
+      setError('Email ve şifre alanları zorunludur');
+      return;
+    }
+
     try {
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'login',
-          email,
-          password,
-        }),
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        router.push('/dashboard');
+      if (result?.error) {
+        switch (result.error) {
+          case 'Kullanıcı bulunamadı':
+            setError('Bu email adresi ile kayıtlı kullanıcı bulunamadı');
+            break;
+          case 'Geçersiz şifre':
+            setError('Girdiğiniz şifre hatalı');
+            break;
+          case 'Hesabınız aktif değil':
+            setError('Hesabınız aktif değil. Lütfen yönetici ile iletişime geçin');
+            break;
+          default:
+            setError('Giriş yapılırken bir hata oluştu');
+        }
       } else {
-        setError(data.message || 'Giriş başarısız');
+        router.push(callbackUrl);
       }
-    } catch (err) {
-      setError('Bir hata oluştu. Lütfen tekrar deneyin.');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError('Giriş işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin');
     }
   };
 
@@ -93,6 +109,15 @@ export default function LoginPage() {
             >
               Giriş Yap
             </button>
+          </div>
+
+          <div className="text-center mt-4">
+            <Link
+              href="/register"
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
+              Hesabınız yok mu? Kayıt olun
+            </Link>
           </div>
         </form>
       </div>

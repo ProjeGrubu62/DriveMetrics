@@ -1,4 +1,12 @@
+import { StopEvent, StallEvent } from './index';
+
 export interface DriveData {
+  id: string;
+  vehicleId: string;
+  vehicleType: string;
+  date: string;
+  duration: number;  // minutes
+  distance: number;  // kilometers
   driverSeatTime: {
     start: number;  // Unix timestamp
     end: number;    // Unix timestamp
@@ -14,29 +22,41 @@ export interface DriveData {
     fourth: number;
     fifth: number;
   };
-  stops: {
-    count: number;
-    totalDuration: number;  // dakika cinsinden
-    stallCount: number;     // istop sayısı
-  };
-  brakeUsage: {
-    count: number;          // fren kullanım sayısı
-    totalDuration: number;  // toplam fren süresi (saniye)
-    hardBrakeCount: number; // sert fren sayısı
-  };
-  gearTransitions: {
-    highRPMCount: number;   // yüksek devirde vites geçiş sayısı
-    lowRPMCount: number;    // düşük devirde vites geçiş sayısı
-  };
-  parkingBrake: {
-    forgottenCount: number;    // el freni unutulma sayısı
-    totalDuration: number;     // toplam unutulma süresi (saniye)
-    transmissionDamage: number; // şanzıman hasar süresi (saniye)
-  };
+  gearShifts: {
+    fromGear: number;
+    toGear: number;
+    speed: number;
+    rpm: number;
+    timestamp: number;
+    clutchUsage: number;
+    revMatching: boolean;
+    clutchDuration: number;
+  }[];
+  speedChanges: {
+    fromSpeed: number;
+    toSpeed: number;
+    acceleration: number;
+    isSudden: boolean;
+  }[];
+  brakeUsages: {
+    intensity: number;
+    isEmergency: boolean;
+    handbrakeUsed: boolean;
+  }[];
+  clutchUsages: {
+    duration: number;
+    gearAtUse: number;
+    isHardRelease: boolean;
+    isSlipping: boolean;
+  }[];
+  stopEvents: StopEvent[];
+  stallEvents: StallEvent[];
   averageSpeed: number;
   maxSpeed: number;
-  distance: number;
-  fuelUsed: number;
+  totalDistance: number;
+  fuelConsumption: number;
+  drivingStyle: 'economic' | 'normal' | 'sporty';
+  clutchHealth: number;
   weatherConditions: {
     temperature: number;
     weather: 'sunny' | 'rainy' | 'snowy' | 'cloudy';
