@@ -48,4 +48,3 @@ Kullanıcı kimlik doğrulama sisteminde kapsamlı iyileştirmeler yapılması p
 ---
 labels: enhancement, authentication, security
 priority: high
-assignees: czt group

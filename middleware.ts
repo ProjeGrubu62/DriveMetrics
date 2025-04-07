@@ -1,48 +1,35 @@
+import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
 
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
-  const { pathname } = request.nextUrl;
+  const isAuthPage = request.nextUrl.pathname.startsWith('/login') || 
+                    request.nextUrl.pathname.startsWith('/register');
 
-  // Ana sayfa için özel kontrol
-  if (pathname === '/') {
-    if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
+  // Oturum açmış kullanıcılar login/register sayfalarına erişmeye çalışırsa
+  if (isAuthPage && token) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // Korumalı rotalar
-  const protectedRoutes = [
+  // Korumalı sayfalara erişim kontrolü
+  const protectedPaths = [
     '/dashboard',
+    '/profile',
     '/analysis',
     '/drive-setup',
     '/manual-entry',
-    '/auto-collect',
-    '/profile'
+    '/auto-collect'
   ];
 
-  // Auth sayfaları
-  const authRoutes = ['/login', '/register'];
-
-  // Geçerli yol korumalı mı kontrol et
-  const isProtectedRoute = protectedRoutes.some(route =>
-    pathname.startsWith(route)
+  const isProtectedPath = protectedPaths.some(path => 
+    request.nextUrl.pathname.startsWith(path)
   );
 
-  const isAuthRoute = authRoutes.includes(pathname);
-
-  // Oturum yoksa ve korumalı rotaya erişilmeye çalışılıyorsa login'e yönlendir
-  if (!token && isProtectedRoute) {
-    const callbackUrl = encodeURIComponent(pathname);
-    return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, request.url));
-  }
-
-  // Oturum varsa ve auth sayfalarına erişilmeye çalışılıyorsa dashboard'a yönlendir
-  if (token && isAuthRoute) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  if (isProtectedPath && !token) {
+    const redirectUrl = new URL('/login', request.url);
+    redirectUrl.searchParams.set('callbackUrl', request.nextUrl.pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 
   return NextResponse.next();
@@ -50,14 +37,13 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/',
     '/dashboard/:path*',
+    '/profile/:path*',
     '/analysis/:path*',
     '/drive-setup/:path*',
     '/manual-entry/:path*',
     '/auto-collect/:path*',
-    '/profile/:path*',
     '/login',
     '/register'
-  ],
+  ]
 };

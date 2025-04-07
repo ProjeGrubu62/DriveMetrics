@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createUser } from '@/lib/auth/auth';
+import { registerUser } from '@/lib/firebase/auth';
+import { auth } from '@/lib/firebase/config';
 
 export async function POST(request: Request) {
   try {
@@ -29,19 +30,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // Kullanıcıyı oluştur
-    const { user, profile } = await createUser({
-      email,
-      password,
-      name,
-      surname,
-    });
+    // Kullanıcıyı Firebase'de oluştur
+    const displayName = `${name} ${surname}`;
+    const user = await registerUser(email, password, displayName);
 
+    // Kullanıcı bilgilerini döndür
     return NextResponse.json(
       { 
         message: 'Kullanıcı başarıyla oluşturuldu',
-        user,
-        profile
+        user: {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          emailVerified: user.emailVerified
+        }
       },
       { status: 201 }
     );
