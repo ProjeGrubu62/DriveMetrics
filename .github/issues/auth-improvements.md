@@ -1,28 +1,20 @@
----
-title: Kullanıcı Kimlik Doğrulama Sistemi İyileştirmeleri
-labels: enhancement, authentication, security
-priority: high
-assignees: tevfik
----
+# Kullanıcı Kimlik Doğrulama Sistemi İyileştirmeleri
 
-## Özet
 Kullanıcı kimlik doğrulama sisteminde kapsamlı iyileştirmeler yapılması planlanmaktadır. Bu iyileştirmeler, kullanıcı deneyimini artıracak ve güvenliği güçlendirecektir.
 
-## Detaylar
-
-### Login Sistemi İyileştirmeleri
+## Login Sistemi İyileştirmeleri
 - Sosyal medya hesapları ile giriş yapma özelliği
 - İki faktörlü kimlik doğrulama (2FA) desteği
 - Oturum yönetimi ve güvenli çıkış işlemleri
 - Şifre sıfırlama sürecinin iyileştirilmesi
 
-### Yönlendirme Sorunlarının Çözümü
+## Yönlendirme Sorunlarının Çözümü
 - Giriş sonrası doğru sayfaya yönlendirme
 - Yetkisiz erişim denemelerinde güvenli yönlendirme
 - URL parametrelerinin güvenli işlenmesi
 - Oturum durumuna göre akıllı yönlendirme sistemi
 
-### Kullanıcı Profil Yönetimi
+## Kullanıcı Profil Yönetimi
 - Kişisel profil bilgilerinin düzenlenmesi
 - Profil fotoğrafı yükleme ve güncelleme
 - Kullanıcı tercihlerinin yönetimi
@@ -52,3 +44,8 @@ Kullanıcı kimlik doğrulama sisteminde kapsamlı iyileştirmeler yapılması p
 - Firebase Authentication kullanılacak
 - Next.js middleware ile yetkilendirme kontrolleri yapılacak
 - Kullanıcı verileri için güvenli depolama çözümleri uygulanacak
+
+---
+labels: enhancement, authentication, security
+priority: high
+assignees: czt group

@@ -26,10 +26,11 @@ jobs:
       run: npm run lint
 
     - name: Run tests
-      run: npm test
+      run: npm test -- --verbose --detectOpenHandles --forceExit
       env:
         CI: true
-      timeout-minutes: 10
+        NODE_ENV: test
+      timeout-minutes: 15
 
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3

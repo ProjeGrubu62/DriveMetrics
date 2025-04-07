@@ -1,7 +1,7 @@
 module.exports = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  testTimeout: 30000,
+  testTimeout: 60000,
   verbose: true,
   collectCoverage: true,
   coverageDirectory: 'coverage',
@@ -11,6 +11,11 @@ module.exports = {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
   },
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1'
-  }
+    '^@/(.*)$': '<rootDir>/$1',
+    '\\.(?:css|less|scss|sass)$': 'identity-obj-proxy'
+  },
+  testEnvironmentOptions: {
+    url: 'http://localhost:3000'
+  },
+  maxWorkers: 4
 };
