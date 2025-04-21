@@ -1,76 +1,50 @@
 import { NextResponse } from 'next/server';
-import { registerUser } from '@/lib/firebase/auth';
-import { auth } from '@/lib/firebase/config';
+import bcrypt from 'bcryptjs';
+import prisma from '@/lib/prisma';
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const { email, password, name, surname } = await request.json();
+    const { email, password } = await req.json();
 
-    if (!email || !password || !name || !surname) {
+    // Validate email and password
+    if (!email || !password) {
       return NextResponse.json(
-        { message: 'Tüm alanların doldurulması zorunludur' },
+        { message: 'Email and password are required' },
         { status: 400 }
       );
     }
 
-    // Email formatını kontrol et
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
       return NextResponse.json(
-        { message: 'Geçerli bir email adresi giriniz' },
+        { message: 'User already exists' },
         { status: 400 }
       );
     }
 
-    // Şifre uzunluğunu kontrol et
-    if (password.length < 6) {
-      return NextResponse.json(
-        { message: 'Şifre en az 6 karakter olmalıdır' },
-        { status: 400 }
-      );
-    }
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Kullanıcıyı Firebase'de oluştur
-    const displayName = `${name} ${surname}`;
-    const user = await registerUser(email, password, displayName);
-
-    // Kullanıcı bilgilerini döndür
-    return NextResponse.json(
-      { 
-        message: 'Kullanıcı başarıyla oluşturuldu',
-        user: {
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          emailVerified: user.emailVerified
-        }
+    // Create user
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
       },
+    });
+
+    return NextResponse.json(
+      { message: 'User created successfully' },
       { status: 201 }
     );
-
-  } catch (error: any) {
-    console.error('Register error:', error);
-    
-    // Firebase veya diğer servislerden gelen hata mesajlarını kontrol et
-    if (error.code === 'auth/email-already-in-use') {
-      return NextResponse.json(
-        { message: 'Bu email adresi zaten kullanımda' },
-        { status: 400 }
-      );
-    } else if (error.code === 'auth/invalid-email') {
-      return NextResponse.json(
-        { message: 'Geçersiz email formatı' },
-        { status: 400 }
-      );
-    } else if (error.code === 'auth/weak-password') {
-      return NextResponse.json(
-        { message: 'Şifre çok zayıf. Lütfen daha güçlü bir şifre seçin' },
-        { status: 400 }
-      );
-    }
-
+  } catch (error) {
+    console.error('Registration error:', error);
     return NextResponse.json(
-      { message: 'Kayıt işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin' },
+      { message: 'Something went wrong' },
       { status: 500 }
     );
   }
