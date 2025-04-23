@@ -48,19 +48,43 @@ export default function Analysis() {
       const convertedData: DriveData = {
         id: Date.now().toString(),
         vehicleId: '1',
-        startTime: Date.now() - 3600000,
-        endTime: Date.now(),
+        vehicleType: 'sedan',
+        date: new Date().toISOString(),
+        duration: 60, // 1 saat
+        distance: data.distance,
+        driverSeatTime: {
+          start: Date.now() - 3600000,
+          end: Date.now()
+        },
+        engineTime: {
+          start: Date.now() - 3600000,
+          end: Date.now()
+        },
+        gearTimes: {
+          first: 0,
+          second: 0,
+          third: 0,
+          fourth: 0,
+          fifth: 0
+        },
         gearShifts: [],
         speedChanges: [],
         brakeUsages: [],
         clutchUsages: [],
+        stopEvents: [],
+        stallEvents: [],
         averageSpeed: data.averageSpeed,
         maxSpeed: data.maxSpeed,
         totalDistance: data.distance,
         fuelConsumption: data.fuelUsed,
         drivingStyle: 'normal',
-        clutchHealth: 100
-      };  // Added missing semicolon
+        clutchHealth: 100,
+        weatherConditions: {
+          temperature: 20,
+          weather: 'sunny',
+          roadCondition: 'dry'
+        }
+      };
       
       setDriveData(convertedData);
       setLastUpdate(new Date());
