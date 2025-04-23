@@ -1,7 +1,7 @@
 # Dependencies
-node_modules/
+/node_modules
 /.pnp
-.pnp.*
+.pnp.js
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
@@ -45,11 +45,7 @@ lerna-debug.log*
 .pnpm-debug.log*
 
 # Local env files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*.local
 
 # TypeScript
 *.tsbuildinfo
@@ -74,3 +70,6 @@ lib-cov/
 
 # Sensitive files
 keyler.txt
+
+# Vercel
+.vercel

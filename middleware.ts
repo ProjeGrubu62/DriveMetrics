@@ -1,49 +1,45 @@
-import { getToken } from 'next-auth/jwt';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  const token = await getToken({ req: request });
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login') || 
-                    request.nextUrl.pathname.startsWith('/register');
+export default withAuth(
+  function middleware(req) {
+    const token = req.nextauth.token;
+    const isAuth = !!token;
+    const isAuthPage = req.nextUrl.pathname.startsWith("/auth");
 
-  // Oturum açmış kullanıcılar login/register sayfalarına erişmeye çalışırsa
-  if (isAuthPage && token) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    if (isAuthPage) {
+      if (isAuth) {
+        return NextResponse.redirect(new URL("/vehicle-setup", req.url));
+      }
+      return null;
+    }
+
+    if (!isAuth) {
+      let from = req.nextUrl.pathname;
+      if (req.nextUrl.search) {
+        from += req.nextUrl.search;
+      }
+      return NextResponse.redirect(
+        new URL(`/auth?callbackUrl=${encodeURIComponent(from)}`, req.url)
+      );
+    }
+
+    return NextResponse.next();
+  },
+  {
+    callbacks: {
+      authorized: ({ token }) => !!token,
+    },
+    pages: {
+      signIn: "/auth",
+    },
   }
-
-  // Korumalı sayfalara erişim kontrolü
-  const protectedPaths = [
-    '/dashboard',
-    '/profile',
-    '/analysis',
-    '/drive-setup',
-    '/manual-entry',
-    '/auto-collect'
-  ];
-
-  const isProtectedPath = protectedPaths.some(path => 
-    request.nextUrl.pathname.startsWith(path)
-  );
-
-  if (isProtectedPath && !token) {
-    const redirectUrl = new URL('/login', request.url);
-    redirectUrl.searchParams.set('callbackUrl', request.nextUrl.pathname);
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  return NextResponse.next();
-}
+);
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/profile/:path*',
-    '/analysis/:path*',
-    '/drive-setup/:path*',
-    '/manual-entry/:path*',
-    '/auto-collect/:path*',
-    '/login',
-    '/register'
-  ]
+    "/vehicle-setup/:path*",
+    "/analysis/:path*",
+    "/dashboard/:path*",
+  ],
 };

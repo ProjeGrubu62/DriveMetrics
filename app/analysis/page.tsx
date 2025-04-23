@@ -19,6 +19,7 @@ import { Line, Doughnut } from 'react-chartjs-2'
 import DriveDataEntry from '../components/DriveDataEntry';
 import DriveAnalysisReport from '../components/DriveAnalysisReport';
 import { ManualDriveData } from '../types';
+import Header from '../components/Header';
 
 ChartJS.register(
   CategoryScale,
@@ -344,270 +345,273 @@ export default function Analysis() {
   ].filter(Boolean) : [], [driveData]);
 
   return (
-    <main className="min-h-screen p-8">
-      <div className="max-w-7xl mx-auto relative">
-        <div className="absolute top-16 right-4 w-48 h-32 rounded-lg overflow-hidden shadow-lg z-10">
-          <Image
-            src={vehicleImage}
-            alt="Selected Vehicle"
-            fill
-            className="object-cover"
-            priority
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
-        </div>
-        
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">Sürüş Analizi</h1>
-          <div className="flex items-center space-x-4">
-            <div className="text-sm text-gray-600">
-              Son Güncelleme: {lastUpdate.toLocaleTimeString('tr-TR')}
+    <>
+      <Header />
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto relative">
+          <div className="absolute top-16 right-4 w-48 h-32 rounded-lg overflow-hidden shadow-lg z-10">
+            <Image
+              src={vehicleImage}
+              alt="Selected Vehicle"
+              fill
+              className="object-cover"
+              priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          </div>
+          
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-4xl font-bold">Sürüş Analizi</h1>
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-gray-600">
+                Son Güncelleme: {lastUpdate.toLocaleTimeString('tr-TR')}
+              </div>
+              <button
+                onClick={updateData}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Veri Üretiliyor...' : 'Yeni Veri Üret'}
+              </button>
             </div>
+          </div>
+          
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+              <div className="text-sm text-red-700">{error}</div>
+            </div>
+          )}
+
+          <div className="flex space-x-4 mb-8">
             <button
-              onClick={updateData}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-              disabled={isLoading}
+              className={`px-4 py-2 rounded ${
+                activeTab === 'vites' ? 'bg-blue-500 text-white' : 'bg-gray-200'
+              }`}
+              onClick={() => setActiveTab('vites')}
             >
-              {isLoading ? 'Veri Üretiliyor...' : 'Yeni Veri Üret'}
+              Vites-Hız Analizi
+            </button>
+            <button
+              className={`px-4 py-2 rounded ${
+                activeTab === 'yakit' ? 'bg-blue-500 text-white' : 'bg-gray-200'
+              }`}
+              onClick={() => setActiveTab('yakit')}
+            >
+              Yakıt ve Ağırlık
+            </button>
+            <button
+              className={`px-4 py-2 rounded ${
+                activeTab === 'fren' ? 'bg-blue-500 text-white' : 'bg-gray-200'
+              }`}
+              onClick={() => setActiveTab('fren')}
+            >
+              Fren Sistemi
+            </button>
+            <button
+              className={`px-4 py-2 rounded ${
+                activeTab === 'patern' ? 'bg-blue-500 text-white' : 'bg-gray-200'
+              }`}
+              onClick={() => setActiveTab('patern')}
+            >
+              Sürüş Paterni
+            </button>
+            <button
+              className={`px-4 py-2 rounded ${
+                activeTab === 'debriyaj' ? 'bg-blue-500 text-white' : 'bg-gray-200'
+              }`}
+              onClick={() => setActiveTab('debriyaj')}
+            >
+              Debriyaj Analizi
             </button>
           </div>
-        </div>
-        
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-            <div className="text-sm text-red-700">{error}</div>
-          </div>
-        )}
 
-        <div className="flex space-x-4 mb-8">
-          <button
-            className={`px-4 py-2 rounded ${
-              activeTab === 'vites' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-            }`}
-            onClick={() => setActiveTab('vites')}
-          >
-            Vites-Hız Analizi
-          </button>
-          <button
-            className={`px-4 py-2 rounded ${
-              activeTab === 'yakit' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-            }`}
-            onClick={() => setActiveTab('yakit')}
-          >
-            Yakıt ve Ağırlık
-          </button>
-          <button
-            className={`px-4 py-2 rounded ${
-              activeTab === 'fren' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-            }`}
-            onClick={() => setActiveTab('fren')}
-          >
-            Fren Sistemi
-          </button>
-          <button
-            className={`px-4 py-2 rounded ${
-              activeTab === 'patern' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-            }`}
-            onClick={() => setActiveTab('patern')}
-          >
-            Sürüş Paterni
-          </button>
-          <button
-            className={`px-4 py-2 rounded ${
-              activeTab === 'debriyaj' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-            }`}
-            onClick={() => setActiveTab('debriyaj')}
-          >
-            Debriyaj Analizi
-          </button>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          {activeTab === 'vites' && (
-            <div>
-              <h2 className="text-2xl font-semibold mb-4">Vites-Hız Analizi</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gray-50 p-4 rounded">
-                  <h3 className="text-lg font-medium mb-2">Vites Geçişleri</h3>
-                  <div className="h-[300px]">
-                    <Line data={vitesData} />
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            {activeTab === 'vites' && (
+              <div>
+                <h2 className="text-2xl font-semibold mb-4">Vites-Hız Analizi</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h3 className="text-lg font-medium mb-2">Vites Geçişleri</h3>
+                    <div className="h-[300px]">
+                      <Line data={vitesData} />
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h3 className="text-lg font-medium mb-2">Hız Dağılımı</h3>
+                    <div className="h-[300px]">
+                      <Doughnut data={hizData} />
+                    </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 p-4 rounded">
-                  <h3 className="text-lg font-medium mb-2">Hız Dağılımı</h3>
-                  <div className="h-[300px]">
-                    <Doughnut data={hizData} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'yakit' && (
-            <div>
-              <h2 className="text-2xl font-semibold mb-4">Yakıt ve Ağırlık Analizi</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gray-50 p-4 rounded">
-                  <h3 className="text-lg font-medium mb-2">Yakıt Tüketimi</h3>
-                  <div className="h-[300px]">
-                    <Line data={yakitData} />
-                  </div>
-                </div>
-                <div className="bg-gray-50 p-4 rounded">
-                  <h3 className="text-lg font-medium mb-2">Ağırlık Etkisi</h3>
-                  <div className="h-[300px]">
-                    <Doughnut data={agirlikData} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'fren' && (
-            <div>
-              <h2 className="text-2xl font-semibold mb-4">Fren Sistemi Analizi</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gray-50 p-4 rounded">
-                  <h3 className="text-lg font-medium mb-2">Fren Kullanımı</h3>
-                  <div className="h-[300px]">
-                    <Line data={frenKullanimData} />
-                  </div>
-                </div>
-                <div className="bg-gray-50 p-4 rounded">
-                  <h3 className="text-lg font-medium mb-2">Fren Sistemi Durumu</h3>
-                  <div className="h-[300px]">
-                    <Doughnut data={frenDurumData} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'patern' && (
-            <div>
-              <h2 className="text-2xl font-semibold mb-4">Sürüş Paterni Analizi</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gray-50 p-4 rounded">
-                  <h3 className="text-lg font-medium mb-2">Ani Hızlanma/Frenleme</h3>
-                  <div className="h-[300px]">
-                    <Line data={hizlanmaData} />
-                  </div>
-                </div>
-                <div className="bg-gray-50 p-4 rounded">
-                  <h3 className="text-lg font-medium mb-2">Sürüş Tarzı Dağılımı</h3>
-                  <div className="h-[300px]">
-                    <Doughnut data={surusTarziData} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'debriyaj' && (
-            <div>
-              <h2 className="text-2xl font-semibold mb-4">Debriyaj Analizi</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gray-50 p-4 rounded">
-                  <h3 className="text-lg font-medium mb-2">Debriyaj Kullanımı</h3>
-                  <div className="h-[300px]">
-                    <Line data={clutchUsageData} />
-                  </div>
-                </div>
-                <div className="bg-gray-50 p-4 rounded">
-                  <h3 className="text-lg font-medium mb-2">Debriyaj Sağlığı</h3>
-                  <div className="h-[300px]">
-                    <Doughnut data={clutchHealthData} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 bg-gray-50 p-4 rounded">
-                <h3 className="text-lg font-medium mb-2">Öneriler ve Uyarılar</h3>
-                {clutchRecommendations.length > 0 ? (
-                  <ul className="list-disc pl-5 space-y-2">
-                    {clutchRecommendations.map((rec, index) => (
-                      <li key={index} className="text-gray-700">{rec}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-700">Debriyaj kullanımı normal seviyelerde.</p>
-                )}
-              </div>
-
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gray-50 p-4 rounded">
-                  <h4 className="font-medium mb-2">Sert Bırakma Oranı</h4>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {driveData ? 
-                      `${((driveData.clutchUsages.filter(u => u.isHardRelease).length / driveData.clutchUsages.length) * 100).toFixed(1)}%` 
-                      : '0%'}
-                  </p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded">
-                  <h4 className="font-medium mb-2">Ortalama Kullanım Süresi</h4>
-                  <p className="text-2xl font-bold text-green-600">
-                    {driveData ? 
-                      `${(driveData.clutchUsages.reduce((acc, u) => acc + u.duration, 0) / driveData.clutchUsages.length).toFixed(0)}ms` 
-                      : '0ms'}
-                  </p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded">
-                  <h4 className="font-medium mb-2">Kaydırma Sayısı</h4>
-                  <p className="text-2xl font-bold text-red-600">
-                    {driveData ? 
-                      driveData.clutchUsages.filter(u => u.isSlipping).length 
-                      : '0'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <DriveAnalysisReport driveData={driveData as import('../../types').DriveData} analysisResult={{
-            overallScore: 85,
-            categoryScores: {
-              gearUsage: driveData ? Math.min(100, 100 - (driveData.clutchUsages.filter(u => u.isHardRelease).length * 5)) : 0,
-              brakeUsage: driveData ? Math.min(100, 100 - (driveData.brakeUsages.filter(b => b.isEmergency).length * 10)) : 0,
-              speedManagement: driveData ? Math.min(100, 100 - (driveData.speedChanges.filter(s => s.isSudden).length * 5)) : 0,
-              fuelEfficiency: driveData ? Math.min(100, 100 - ((driveData.fuelConsumption / driveData.totalDistance * 100 - 5) * 10)) : 0,
-              safetyScore: driveData ? driveData.clutchHealth : 0
-            },
-            warnings: driveData ? [
-              ...(driveData.clutchUsages.filter(u => u.isHardRelease).length > 2 ? ['Sert debriyaj bırakmaları tespit edildi'] : []),
-              ...(driveData.brakeUsages.filter(b => b.isEmergency).length > 1 ? ['Ani fren kullanımları mevcut'] : []),
-              ...(driveData.speedChanges.filter(s => s.isSudden).length > 3 ? ['Ani hızlanmalar tespit edildi'] : [])
-            ] : [],
-            recommendations: driveData ? [
-              'Vites geçişlerinde debriyajı daha yumuşak kullanın',
-              'Takip mesafesini koruyarak ani fren ihtiyacını azaltın',
-              'Ekonomik sürüş için sabit hızda gitmeye özen gösterin'
-            ] : []
-          }} />
-
-          <div className="mb-8">
-            <div className="flex space-x-4">
-              <button
-                className={`px-4 py-2 rounded ${dataMode === 'auto' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                onClick={() => setDataMode('auto')}
-              >
-                Automatic Data
-              </button>
-              <button
-                className={`px-4 py-2 rounded ${dataMode === 'manual' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                onClick={() => setDataMode('manual')}
-              >
-                Manual Entry
-              </button>
-            </div>
-            
-            {dataMode === 'manual' && (
-              <div className="mt-4">
-                <DriveDataEntry onDataSubmit={handleManualDataSubmit} />
               </div>
             )}
+
+            {activeTab === 'yakit' && (
+              <div>
+                <h2 className="text-2xl font-semibold mb-4">Yakıt ve Ağırlık Analizi</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h3 className="text-lg font-medium mb-2">Yakıt Tüketimi</h3>
+                    <div className="h-[300px]">
+                      <Line data={yakitData} />
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h3 className="text-lg font-medium mb-2">Ağırlık Etkisi</h3>
+                    <div className="h-[300px]">
+                      <Doughnut data={agirlikData} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'fren' && (
+              <div>
+                <h2 className="text-2xl font-semibold mb-4">Fren Sistemi Analizi</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h3 className="text-lg font-medium mb-2">Fren Kullanımı</h3>
+                    <div className="h-[300px]">
+                      <Line data={frenKullanimData} />
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h3 className="text-lg font-medium mb-2">Fren Sistemi Durumu</h3>
+                    <div className="h-[300px]">
+                      <Doughnut data={frenDurumData} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'patern' && (
+              <div>
+                <h2 className="text-2xl font-semibold mb-4">Sürüş Paterni Analizi</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h3 className="text-lg font-medium mb-2">Ani Hızlanma/Frenleme</h3>
+                    <div className="h-[300px]">
+                      <Line data={hizlanmaData} />
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h3 className="text-lg font-medium mb-2">Sürüş Tarzı Dağılımı</h3>
+                    <div className="h-[300px]">
+                      <Doughnut data={surusTarziData} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'debriyaj' && (
+              <div>
+                <h2 className="text-2xl font-semibold mb-4">Debriyaj Analizi</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h3 className="text-lg font-medium mb-2">Debriyaj Kullanımı</h3>
+                    <div className="h-[300px]">
+                      <Line data={clutchUsageData} />
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h3 className="text-lg font-medium mb-2">Debriyaj Sağlığı</h3>
+                    <div className="h-[300px]">
+                      <Doughnut data={clutchHealthData} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-gray-50 p-4 rounded">
+                  <h3 className="text-lg font-medium mb-2">Öneriler ve Uyarılar</h3>
+                  {clutchRecommendations.length > 0 ? (
+                    <ul className="list-disc pl-5 space-y-2">
+                      {clutchRecommendations.map((rec, index) => (
+                        <li key={index} className="text-gray-700">{rec}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-700">Debriyaj kullanımı normal seviyelerde.</p>
+                  )}
+                </div>
+
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h4 className="font-medium mb-2">Sert Bırakma Oranı</h4>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {driveData ? 
+                        `${((driveData.clutchUsages.filter(u => u.isHardRelease).length / driveData.clutchUsages.length) * 100).toFixed(1)}%` 
+                        : '0%'}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h4 className="font-medium mb-2">Ortalama Kullanım Süresi</h4>
+                    <p className="text-2xl font-bold text-green-600">
+                      {driveData ? 
+                        `${(driveData.clutchUsages.reduce((acc, u) => acc + u.duration, 0) / driveData.clutchUsages.length).toFixed(0)}ms` 
+                        : '0ms'}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h4 className="font-medium mb-2">Kaydırma Sayısı</h4>
+                    <p className="text-2xl font-bold text-red-600">
+                      {driveData ? 
+                        driveData.clutchUsages.filter(u => u.isSlipping).length 
+                        : '0'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DriveAnalysisReport driveData={driveData as import('../../types').DriveData} analysisResult={{
+              overallScore: 85,
+              categoryScores: {
+                gearUsage: driveData ? Math.min(100, 100 - (driveData.clutchUsages.filter(u => u.isHardRelease).length * 5)) : 0,
+                brakeUsage: driveData ? Math.min(100, 100 - (driveData.brakeUsages.filter(b => b.isEmergency).length * 10)) : 0,
+                speedManagement: driveData ? Math.min(100, 100 - (driveData.speedChanges.filter(s => s.isSudden).length * 5)) : 0,
+                fuelEfficiency: driveData ? Math.min(100, 100 - ((driveData.fuelConsumption / driveData.totalDistance * 100 - 5) * 10)) : 0,
+                safetyScore: driveData ? driveData.clutchHealth : 0
+              },
+              warnings: driveData ? [
+                ...(driveData.clutchUsages.filter(u => u.isHardRelease).length > 2 ? ['Sert debriyaj bırakmaları tespit edildi'] : []),
+                ...(driveData.brakeUsages.filter(b => b.isEmergency).length > 1 ? ['Ani fren kullanımları mevcut'] : []),
+                ...(driveData.speedChanges.filter(s => s.isSudden).length > 3 ? ['Ani hızlanmalar tespit edildi'] : [])
+              ] : [],
+              recommendations: driveData ? [
+                'Vites geçişlerinde debriyajı daha yumuşak kullanın',
+                'Takip mesafesini koruyarak ani fren ihtiyacını azaltın',
+                'Ekonomik sürüş için sabit hızda gitmeye özen gösterin'
+              ] : []
+            }} />
+
+            <div className="mb-8">
+              <div className="flex space-x-4">
+                <button
+                  className={`px-4 py-2 rounded ${dataMode === 'auto' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                  onClick={() => setDataMode('auto')}
+                >
+                  Automatic Data
+                </button>
+                <button
+                  className={`px-4 py-2 rounded ${dataMode === 'manual' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                  onClick={() => setDataMode('manual')}
+                >
+                  Manual Entry
+                </button>
+              </div>
+              
+              {dataMode === 'manual' && (
+                <div className="mt-4">
+                  <DriveDataEntry onDataSubmit={handleManualDataSubmit} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </main>
+    </>
   );
 }

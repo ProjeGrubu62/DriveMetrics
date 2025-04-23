@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import ManualDataEntry from '../components/ManualDataEntry';
 import { ManualDriveData } from '../types';
+import Header from '../components/Header';
 
 export default function ManualEntryPage() {
   const router = useRouter();
@@ -15,9 +16,12 @@ export default function ManualEntryPage() {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6 text-center">Manuel Veri Girişi</h1>
-      <ManualDataEntry onDataSubmit={handleDataSubmit} />
-    </div>
+    <>
+      <Header />
+      <div className="container mx-auto py-8">
+        <h1 className="text-2xl font-bold mb-6 text-center">Manuel Veri Girişi</h1>
+        <ManualDataEntry onDataSubmit={handleDataSubmit} />
+      </div>
+    </>
   );
 }

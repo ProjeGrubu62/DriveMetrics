@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { generateTestData } from '../../lib/data/testData';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface Vehicle {
   brand: string;
@@ -12,6 +14,8 @@ interface Vehicle {
 }
 
 export default function ManualDataEntry() {
+  const { data: session } = useSession();
+  const router = useRouter();
   const [vehicle, setVehicle] = useState<Vehicle>({
     brand: '',
     model: '',
@@ -54,32 +58,77 @@ export default function ManualDataEntry() {
 
   const [loading, setLoading] = useState(false);
   const [weightWarning, setWeightWarning] = useState('');
-  const [vehicleImage, setVehicleImage] = useState('/images/vehicles/default-car.jpg');  // Add this line
+  const [vehicleImage, setVehicleImage] = useState('/images/vehicles/default-car.jpg');
   const [standardWeight, setStandardWeight] = useState(0);
 
-  const fetchVehicleImage = async (year: number) => {  // Add this function
+  // Initialize form with default values
+  useEffect(() => {
+    if (carBrands.length > 0) {
+      const defaultBrand = carBrands[0];
+      const defaultModels = modelsByBrand[defaultBrand] || [];
+      const defaultModel = defaultModels.length > 0 ? defaultModels[0] : '';
+      const defaultWeight = defaultModel ? standardWeights[defaultBrand]?.[defaultModel] || 0 : 0;
+      
+      setVehicle({
+        brand: defaultBrand,
+        model: defaultModel,
+        year: new Date().getFullYear(),
+        weight: defaultWeight
+      });
+      
+      setAvailableModels(defaultModels);
+      setStandardWeight(defaultWeight);
+      
+      if (defaultBrand && defaultModel) {
+        fetchVehicleImage(new Date().getFullYear());
+      }
+    }
+  }, []);
+
+  const fetchVehicleImage = async (year: number) => {
+    if (!vehicle.brand || !vehicle.model) return;
+    
     try {
-      console.log('Fetching image for:', vehicle.brand, vehicle.model, year);
+      console.log('Fetching image for:', {
+        brand: vehicle.brand,
+        model: vehicle.model,
+        year: year
+      });
+
       const response = await fetch(
-        `/api/vehicle-image?brand=${vehicle.brand}&model=${vehicle.model}&year=${year}`
+        `/api/vehicle-image?brand=${encodeURIComponent(vehicle.brand)}&model=${encodeURIComponent(vehicle.model)}&year=${year}`,
+        { cache: 'no-store' }
       );
+      
+      if (!response.ok) {
+        throw new Error('Image fetch failed');
+      }
+
       const data = await response.json();
-      console.log('API Response:', data);
+      console.log('Vehicle image API response:', data);
       
       if (data.error) {
-        console.error('Error:', data.error);
+        console.error('API Error:', data.error);
         return;
       }
       
-      setVehicleImage(data.imageUrl);
+      if (data.imageUrl) {
+        console.log('Setting new vehicle image:', data.imageUrl);
+        setVehicleImage(data.imageUrl);
+      }
     } catch (error) {
-      console.error('Error fetching image:', error);
+      console.error('Error fetching vehicle image:', error);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    if (!session?.user) {
+      router.push('/auth?callbackUrl=/vehicle-setup');
+      return;
+    }
 
     try {
       const testData = generateTestData();
@@ -91,23 +140,92 @@ export default function ManualDataEntry() {
         body: JSON.stringify({
           vehicle,
           driveData: testData,
+          vehicleImage,
+          userId: session.user.id
         }),
       });
 
-      if (!response.ok) throw new Error('Veri gönderimi başarısız');
+      if (!response.ok) {
+        throw new Error('Veri gönderimi başarısız');
+      }
 
       // Save the vehicle image before navigation
       localStorage.setItem('selectedVehicleImage', vehicleImage);
       
-      // Veri giriş yöntemi seçimi için drive-setup sayfasına yönlendir
-      window.location.href = '/drive-setup';
-      console.log('Saved image URL:', vehicleImage); // Debug log
+      // Analiz sayfasına yönlendir
+      router.push('/analysis');
     } catch (error) {
       console.error('Hata:', error);
       alert('Veri gönderilirken bir hata oluştu.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedBrand = e.target.value;
+    const models = modelsByBrand[selectedBrand] || [];
+    const defaultModel = models.length > 0 ? models[0] : '';
+    const defaultWeight = defaultModel ? standardWeights[selectedBrand]?.[defaultModel] || 0 : 0;
+    
+    setVehicle(prev => {
+      const newVehicle = {
+        ...prev,
+        brand: selectedBrand,
+        model: defaultModel,
+        weight: defaultWeight
+      };
+      
+      // Fetch new image after state update
+      if (selectedBrand && defaultModel) {
+        fetchVehicleImage(newVehicle.year);
+      }
+      
+      return newVehicle;
+    });
+    
+    setAvailableModels(models);
+    setStandardWeight(defaultWeight);
+    setWeightWarning('');
+  };
+
+  const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedModel = e.target.value;
+    const newStandardWeight = standardWeights[vehicle.brand]?.[selectedModel] || 0;
+    
+    setVehicle(prev => {
+      const newVehicle = {
+        ...prev,
+        model: selectedModel,
+        weight: newStandardWeight
+      };
+      
+      // Fetch new image after state update
+      if (vehicle.brand && selectedModel) {
+        fetchVehicleImage(newVehicle.year);
+      }
+      
+      return newVehicle;
+    });
+    
+    setStandardWeight(newStandardWeight);
+    setWeightWarning('');
+  };
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const year = parseInt(e.target.value) || new Date().getFullYear();
+    setVehicle(prev => {
+      const newVehicle = {
+        ...prev,
+        year
+      };
+      
+      if (newVehicle.brand && newVehicle.model) {
+        fetchVehicleImage(year);
+      }
+      
+      return newVehicle;
+    });
   };
 
   return (
@@ -120,17 +238,7 @@ export default function ManualDataEntry() {
           <select
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             value={vehicle.brand}
-            onChange={(e) => {
-              const selectedBrand = e.target.value;
-              setVehicle({
-                ...vehicle,
-                brand: selectedBrand,
-                model: '',
-                weight: 0
-              });
-              setAvailableModels(modelsByBrand[selectedBrand] || []);
-              setWeightWarning('');
-            }}
+            onChange={handleBrandChange}
             required
           >
             <option value="">Marka Seçiniz</option>
@@ -145,18 +253,7 @@ export default function ManualDataEntry() {
           <select
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             value={vehicle.model}
-            onChange={(e) => {
-              const selectedModel = e.target.value;
-              const newStandardWeight = standardWeights[vehicle.brand]?.[selectedModel] || 0;
-              setVehicle({
-                ...vehicle,
-                model: selectedModel,
-                weight: 0
-              });
-              setStandardWeight(newStandardWeight);
-              setWeightWarning('');
-              fetchVehicleImage(vehicle.year);
-            }}
+            onChange={handleModelChange}
             disabled={!vehicle.brand}
             required
           >
@@ -172,14 +269,10 @@ export default function ManualDataEntry() {
           <input
             type="number"
             min="1990"
-            max={new Date().getFullYear()}
+            max={new Date().getFullYear() + 5}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             value={vehicle.year || ''}
-            onChange={(e) => {
-              const year = parseInt(e.target.value) || new Date().getFullYear();
-              setVehicle({ ...vehicle, year });
-              fetchVehicleImage(year);
-            }}
+            onChange={handleYearChange}
             required
           />
         </div>
@@ -190,7 +283,7 @@ export default function ManualDataEntry() {
             <input
               type="number"
               min="800"
-              max={standardWeight}
+              max="5000"
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               value={vehicle.weight || ''}
               onChange={(e) => {
@@ -198,7 +291,7 @@ export default function ManualDataEntry() {
                 setVehicle({ ...vehicle, weight });
                 if (weight < standardWeight * 0.7) {
                   setWeightWarning('Ağırlık çok düşük - Parça eksikliği olabilir');
-                } else if (weight >= standardWeight) {
+                } else if (weight > standardWeight * 1.3) {
                   setWeightWarning('Maksimum ağırlık aşıldı');
                 } else {
                   setWeightWarning('');
@@ -207,7 +300,7 @@ export default function ManualDataEntry() {
               required
             />
             <div className="absolute right-0 top-0 mt-1 mr-2 text-sm text-gray-400">
-              Max: {standardWeight} kg
+              Standart: {standardWeight} kg
             </div>
           </div>
           {weightWarning && (
@@ -233,10 +326,12 @@ export default function ManualDataEntry() {
               fill
               className="object-cover"
               priority
+              unoptimized
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
         </div>
       </form>
     </div>
-  );  // Closing brace for return statement
-}  // Closing brace for ManualDataEntry function
+  );
+}
