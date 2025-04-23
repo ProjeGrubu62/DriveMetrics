@@ -1,3 +1,5 @@
+import { DriveData } from '../../app/types/drive';
+
 export interface SpeedChange {
     fromSpeed: number;
     toSpeed: number;
@@ -22,13 +24,17 @@ export interface SpeedChange {
     timestamp: number;
   }
   
-  export function generateTestData(duration: number = 3600) { // duration in seconds
+  export function generateTestData(duration: number = 3600): DriveData { // duration in seconds
     const startTime = Date.now() - (duration * 1000);
     const endTime = Date.now();
     
     return {
       id: Math.random().toString(36).substring(7),
       vehicleId: Math.random().toString(36).substring(7),
+      vehicleType: 'sedan',
+      date: new Date(startTime).toISOString().split('T')[0],
+      duration: duration / 60, // Convert to minutes
+      distance: (45 * duration) / 3600, // km
       driverSeatTime: {
         start: startTime,
         end: endTime
@@ -36,6 +42,13 @@ export interface SpeedChange {
       engineTime: {
         start: startTime + 5000, // 5 seconds after sitting
         end: endTime - 3000 // 3 seconds before leaving
+      },
+      gearTimes: {
+        first: duration * 0.3,
+        second: duration * 0.25,
+        third: duration * 0.2,
+        fourth: duration * 0.15,
+        fifth: duration * 0.1
       },
       gearShifts: generateGearShifts(duration, startTime),
       speedChanges: generateSpeedChanges(duration, startTime),
