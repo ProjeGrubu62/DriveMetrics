@@ -1,11 +1,11 @@
 export interface User {
   id: string;
   email: string;
-  password: string;
   name: string;
-  surname: string;
-  role: 'user' | 'admin';
-  isActive: boolean;
+  password?: string;
+  surname?: string;
+  role?: 'user' | 'admin';
+  isActive?: boolean;
   createdAt: number;
   lastLoginAt: number;
 }
