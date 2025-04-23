@@ -73,15 +73,43 @@ export default function DriveDataEntry({ onDataSubmit }: { onDataSubmit: (data: 
       
       <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded-lg shadow">
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Total Journey Time (minutes)
-            <input
-              type="number"
-              value={formData.totalTime}
-              onChange={(e) => setFormData({...formData, totalTime: Number(e.target.value)})}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-            />
-          </label>
+          <h3 className="text-lg font-medium mb-2">Journey Time</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <label className="block text-sm font-medium text-gray-700">
+              Start Time
+              <input
+                type="datetime-local"
+                value={new Date(formData.driverSeatTime.start).toISOString().slice(0, 16)}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  driverSeatTime: {
+                    ...formData.driverSeatTime,
+                    start: new Date(e.target.value).getTime()
+                  }
+                })}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+              />
+            </label>
+            <label className="block text-sm font-medium text-gray-700">
+              End Time
+              <input
+                type="datetime-local"
+                value={new Date(formData.driverSeatTime.end).toISOString().slice(0, 16)}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  driverSeatTime: {
+                    ...formData.driverSeatTime,
+                    end: new Date(e.target.value).getTime()
+                  },
+                  engineTime: {
+                    ...formData.engineTime,
+                    end: new Date(e.target.value).getTime()
+                  }
+                })}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+              />
+            </label>
+          </div>
         </div>
 
         <div className="space-y-2">
