@@ -66,7 +66,7 @@ interface ValidationResult {
 
 export const validateDriveData = (data: DriveData): ValidationResult => {
   const sum = data.brakeUsages.reduce((acc, brake) => acc + brake.intensity, 0);
-  const time = data.gearShifts.reduce((acc, shift) => acc + shift.time, 0);
+  const time = data.gearShifts.reduce((acc, shift) => acc + shift.clutchDuration, 0);
   const totalGearTime = data.clutchUsages.reduce((acc, usage) => acc + usage.duration, 0);
 
   return {
