@@ -1,8 +1,7 @@
 'use client'
 import { useEffect, useState, useRef, useMemo } from 'react'
 import Image from 'next/image'
-// Fix the import paths - remove duplicate and use correct path
-import { generateDriveData } from '../../utils/dataGenerator'
+import { generateDriveData } from '@/utils/dataGenerator'
 import { DriveData, Vehicle } from '../types'
 import {
   Chart as ChartJS,
@@ -590,7 +589,7 @@ export default function Analysis() {
               </div>
             )}
 
-            <DriveAnalysisReport driveData={driveData as import('../../types').DriveData} analysisResult={{
+            <DriveAnalysisReport driveData={driveData as DriveData} analysisResult={{
               overallScore: 85,
               categoryScores: {
                 gearUsage: driveData ? Math.min(100, 100 - (driveData.clutchUsages.filter(u => u.isHardRelease).length * 5)) : 0,
