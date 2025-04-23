@@ -20,6 +20,7 @@ model User {
 
   accounts Account[]
   sessions Session[]
+  drives   Drive[]
 }
 
 model Account {
@@ -47,4 +48,16 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Drive {
+  id              String   @id @default(cuid())
+  userId          String
+  date            DateTime @default(now())
+  distance        Float
+  duration        Int
+  averageSpeed    Float
+  fuelConsumption Float
+  vehicleType     String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 } 

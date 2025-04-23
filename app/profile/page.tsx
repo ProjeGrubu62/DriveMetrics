@@ -5,18 +5,18 @@ import { useAuth } from '../contexts/AuthContext';
 import { DriveData } from '../types/drive';
 import DrivePerformanceChart from '../components/DrivePerformanceChart';
 import { FaCar, FaGasPump, FaRoad, FaClock } from 'react-icons/fa';
-import { getUserDriveHistory } from '@/lib/firebase/auth';
+import { getUserDriveHistory } from '@/lib/data/drives';
 import Header from '../components/Header';
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { session, status } = useAuth();
   const [driveHistory, setDriveHistory] = useState<DriveData[]>([]);
 
   useEffect(() => {
     const fetchDriveHistory = async () => {
       try {
-        if (user) {
-          const driveData = await getUserDriveHistory();
+        if (session?.user) {
+          const driveData = await getUserDriveHistory(session.user.id);
           setDriveHistory(driveData);
         }
       } catch (error) {
@@ -25,9 +25,13 @@ export default function ProfilePage() {
     };
 
     fetchDriveHistory();
-  }, [user]);
+  }, [session]);
 
-  if (!user) {
+  if (status === "loading") {
+    return <div>Yükleniyor...</div>;
+  }
+
+  if (status === "unauthenticated") {
     return <div>Lütfen giriş yapın</div>;
   }
 
@@ -38,8 +42,8 @@ export default function ProfilePage() {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">{user.displayName || 'Kullanıcı'}</h1>
-              <p className="text-gray-600">{user.email}</p>
+              <h1 className="text-3xl font-bold text-gray-800">{session?.user?.name || 'Kullanıcı'}</h1>
+              <p className="text-gray-600">{session?.user?.email}</p>
             </div>
             <div className="bg-blue-100 rounded-full p-4">
               <FaCar className="text-blue-600 text-2xl" />
