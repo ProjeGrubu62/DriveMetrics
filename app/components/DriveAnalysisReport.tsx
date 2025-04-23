@@ -82,6 +82,9 @@ export default function DriveAnalysisReport({ driveData, analysisResult }: Drive
       // gearTimes için null kontrolü ekle
       const gearTimes = driveData.gearTimes || defaultGearTimes;
       
+      const totalStopDuration = driveData.stopEvents?.reduce((total, stop) => total + stop.duration, 0) || 0;
+      const totalStops = driveData.stopEvents?.length || 0;
+      
       return (
         <div className="space-y-6">
           <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
@@ -147,7 +150,7 @@ export default function DriveAnalysisReport({ driveData, analysisResult }: Drive
                   <tr>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Duruşlar</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{driveData.speedChanges.filter(change => change.toSpeed === 0).length} kez</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Toplam: {driveData.speedChanges?.filter(change => change.toSpeed === 0).reduce((acc, curr) => acc + (curr.duration || 0), 0) || 0} dk</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Toplam: {totalStops} duruş</td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Debriyaj Sağlığı</td>
