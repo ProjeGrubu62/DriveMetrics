@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { DriveData } from '../types/drive';
 import DrivePerformanceChart from '../components/DrivePerformanceChart';
 import { FaCar, FaGasPump, FaRoad, FaClock } from 'react-icons/fa';
-import { getUserDriveHistory } from '@/lib/data/drives';
+import { getDrives } from '../../lib/data/drives';
 import Header from '../components/Header';
 
 export default function ProfilePage() {
@@ -16,7 +16,7 @@ export default function ProfilePage() {
     const fetchDriveHistory = async () => {
       try {
         if (session?.user) {
-          const driveData = await getUserDriveHistory(session.user.id);
+          const driveData = await getDrives(session.user.id);
           setDriveHistory(driveData);
         }
       } catch (error) {

@@ -19,6 +19,7 @@ import DriveDataEntry from '../components/DriveDataEntry';
 import DriveAnalysisReport from '../components/DriveAnalysisReport';
 import { ManualDriveData } from '../types';
 import Header from '../components/Header';
+import { generateTestData } from '../../lib/data/testData';
 
 ChartJS.register(
   CategoryScale,

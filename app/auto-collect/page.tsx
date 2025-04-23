@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { DriveDataGenerator } from '@/lib/data/DriveDataGenerator';
+import { DriveDataGenerator } from '../../lib/data/DriveDataGenerator';
 import Header from '../components/Header';
 
 export default function AutoCollectPage() {
