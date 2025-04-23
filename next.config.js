@@ -12,7 +12,14 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  swcMinify: false
+  swcMinify: false,
+  webpack: (config, { dev, isServer }) => {
+    config.optimization = {
+      ...config.optimization,
+      minimize: false
+    }
+    return config
+  }
 }
 
 module.exports = nextConfig
