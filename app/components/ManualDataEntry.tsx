@@ -34,7 +34,15 @@ export default function ManualDataEntry({ onDataSubmit }: { onDataSubmit: (data:
       temperature: 20,
       weather: 'sunny',
       roadCondition: 'dry'
-    }
+    },
+    gearShifts: [],
+    speedChanges: [],
+    brakeUsages: [],
+    clutchUsages: [],
+    stopEvents: [],
+    stallEvents: [],
+    drivingStyle: 'normal',
+    clutchHealth: 100
   });
   const [errors, setErrors] = useState<string[]>([]);
   const router = useRouter();
