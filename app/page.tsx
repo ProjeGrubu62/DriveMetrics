@@ -1,20 +1,18 @@
 'use client'
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 
 export default function Home() {
   const router = useRouter();
-  const { status } = useSession();
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.replace('/auth');
-    } else if (status === 'authenticated') {
-      router.replace('/vehicle-setup');
-    }
-  }, [status, router]);
+    router.push('/vehicle-setup');
+  }, [router]);
 
-  return null;
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+      <div className="text-white text-2xl">Yönlendiriliyor...</div>
+    </div>
+  );
 }

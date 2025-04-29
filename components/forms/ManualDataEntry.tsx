@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { generateTestData } from '../../lib/data/testData';
 import Image from 'next/image';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 interface Vehicle {
@@ -14,7 +13,6 @@ interface Vehicle {
 }
 
 export default function ManualDataEntry() {
-  const { data: session } = useSession();
   const router = useRouter();
   const [vehicle, setVehicle] = useState<Vehicle>({
     brand: '',
@@ -125,11 +123,6 @@ export default function ManualDataEntry() {
     e.preventDefault();
     setLoading(true);
 
-    if (!session?.user) {
-      router.push('/auth?callbackUrl=/vehicle-setup');
-      return;
-    }
-
     try {
       const testData = generateTestData();
       const response = await fetch('/api/analysis', {
@@ -141,7 +134,7 @@ export default function ManualDataEntry() {
           vehicle,
           driveData: testData,
           vehicleImage,
-          userId: session.user.id
+          userId: 'test-user' // Using a test user ID
         }),
       });
 

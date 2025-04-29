@@ -1,45 +1,18 @@
-import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
-    const isAuth = !!token;
-    const isAuthPage = req.nextUrl.pathname.startsWith("/auth");
+export default function middleware(req: NextRequest) {
+  // Allow access to all pages without authentication
+  return NextResponse.next();
+}
 
-    if (isAuthPage) {
-      if (isAuth) {
-        return NextResponse.redirect(new URL("/vehicle-setup", req.url));
-      }
-      return null;
-    }
-
-    if (!isAuth) {
-      let from = req.nextUrl.pathname;
-      if (req.nextUrl.search) {
-        from += req.nextUrl.search;
-      }
-      return NextResponse.redirect(
-        new URL(`/auth?callbackUrl=${encodeURIComponent(from)}`, req.url)
-      );
-    }
-
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-    pages: {
-      signIn: "/auth",
-    },
-  }
-);
-
+// Sadece korumalı rotaları belirt
 export const config = {
   matcher: [
-    "/vehicle-setup/:path*",
-    "/analysis/:path*",
-    "/dashboard/:path*",
+    "/vehicle-setup",
+    "/analysis",
+    "/dashboard",
+    "/profile",
+    "/auth"
   ],
 };
