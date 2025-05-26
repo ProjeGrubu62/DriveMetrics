@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DriveMetrics
 
-## Getting Started
+**DriveMetrics**, sürüş verilerini analiz ederek kullanıcıya anlamlı bilgiler sunan modern bir web uygulamasıdır. Proje, Next.js ile geliştirilmiş olup, kullanıcı dostu arayüzü ve güçlü altyapısıyla öne çıkar.
 
-First, run the development server:
+## 🚀 Başlarken
+
+Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları izleyebilirsiniz:
+
+### 1. Depoyu Klonlayın
+
+```bash
+git clone https://github.com/ProjeGrubu62/DriveMetrics.git
+cd DriveMetrics
+```
+
+### 2. Bağımlılıkları Yükleyin
+
+Aşağıdaki komutlardan birini kullanarak gerekli paketleri yükleyin:
+
+```bash
+npm install
+# veya
+yarn install
+# veya
+pnpm install
+```
+
+### 3. Geliştirme Sunucusunu Başlatın
 
 ```bash
 npm run dev
-# or
+# veya
 yarn dev
-# or
+# veya
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Tarayıcınızda [http://localhost:3000](http://localhost:3000) adresini açarak uygulamayı görüntüleyebilirsiniz.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📂 Proje Hakkında
 
-## Learn More
+DriveMetrics, araçlardan veya kullanıcıdan alınan sürüş verilerini analiz ederek;
+- Sürüş performansı,
+- Güvenli sürüş önerileri,
+- Yolculuk geçmişi ve istatistikleri
+gibi birçok konuda kullanıcıya bilgi sunar.
 
-To learn more about Next.js, take a look at the following resources:
+Modern arayüzü sayesinde verilerinizi kolayca takip edebilir, geçmiş sürüşlerinizi analiz edebilirsiniz.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Katkıda Bulunmak
 
-## Deploy on Vercel
+Projeye katkı sağlamak isterseniz, lütfen bir **fork** oluşturun ve değişikliklerinizi yeni bir branch'te yaparak **pull request** gönderin.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📄 Lisans
+
+Bu proje MIT lisansı ile lisanslanmıştır.
+
+---
+
+## 📞 İletişim
+
+Her türlü soru ve öneriniz için bizimle iletişime geçebilirsiniz.
