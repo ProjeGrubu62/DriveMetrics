@@ -51,6 +51,14 @@ Modern arayüzü sayesinde verilerinizi kolayca takip edebilir, geçmiş sürü�
 
 ---
 
+## Kullanım Videosu
+
+Bu video, **DriveMetrics** web sitesinin ilk versiyonunun nasıl çalıştığını ve temel özelliklerini gösterir. Videoyu izleyerek temel işlevleri görebilirsiniz.
+
+https://github.com/user-attachments/assets/1af930ff-0112-4043-a17a-c53333a2a830
+
+---
+
 ## 🛠️ Katkıda Bulunmak
 
 Projeye katkı sağlamak isterseniz, lütfen bir **fork** oluşturun ve değişikliklerinizi yeni bir branch'te yaparak **pull request** gönderin.
