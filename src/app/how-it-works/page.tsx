@@ -1,6 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import { FaCar, FaChartLine, FaRoad, FaTachometerAlt, FaUser, FaHistory, FaShieldAlt, FaLeaf } from 'react-icons/fa';
+import Image from 'next/image';
 
 export default function HowItWorks() {
   const features = [
@@ -72,6 +73,27 @@ export default function HowItWorks() {
     }
   ];
 
+  const screenshots = [
+    {
+      src: "/images/how-it-works/dashboard-screenshot.png",
+      alt: "DriveMetrics Dashboard",
+      title: "Modern Dashboard",
+      description: "Tüm sürüş verilerinizi tek bir ekranda görüntüleyin"
+    },
+    {
+      src: "/images/how-it-works/analysis-screenshot.png",
+      alt: "DriveMetrics Analysis",
+      title: "Detaylı Analiz",
+      description: "Yapay zeka destekli detaylı sürüş analizi"
+    },
+    {
+      src: "/images/how-it-works/features-screenshot.png",
+      alt: "DriveMetrics Features",
+      title: "Gelişmiş Özellikler",
+      description: "Sürüşünüzü iyileştirmek için tüm araçlar"
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-red-50 to-white">
       {/* Hero Section */}
@@ -93,8 +115,68 @@ export default function HowItWorks() {
         </div>
       </div>
 
+      {/* Screenshots Section */}
+      <div className="py-20 overflow-hidden bg-gradient-to-br from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Uygulama Görünümü</h2>
+            <p className="text-xl text-gray-600">DriveMetrics'in modern ve kullanıcı dostu arayüzü</p>
+          </motion.div>
+
+          <div className="space-y-16">
+            {screenshots.map((screenshot, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: index * 0.2 }}
+                className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-8 lg:gap-16`}
+              >
+                {/* Image Container */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="w-full lg:w-2/3 relative group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-2xl blur-xl" />
+                  <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 group-hover:shadow-3xl">
+                    <div className="aspect-w-16 aspect-h-9">
+                      <Image
+                        src={screenshot.src}
+                        alt={screenshot.alt}
+                        width={1200}
+                        height={675}
+                        className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                </motion.div>
+
+                {/* Content Container */}
+                <motion.div
+                  initial={{ opacity: 0, x: index % 2 === 0 ? 50 : -50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.7, delay: index * 0.2 + 0.3 }}
+                  className="w-full lg:w-1/3"
+                >
+                  <div className="bg-white rounded-2xl p-8 shadow-lg">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">{screenshot.title}</h3>
+                    <p className="text-lg text-gray-600">{screenshot.description}</p>
+                  </div>
+                </motion.div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Features Section */}
-      <div className="py-20">
+      <div className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -113,9 +195,12 @@ export default function HowItWorks() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300"
               >
-                <div className="text-red-500 mb-4">{feature.icon}</div>
+                <div className="text-red-500 mb-4 transform group-hover:scale-110 transition-transform duration-300">
+                  {feature.icon}
+                </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
               </motion.div>
@@ -125,7 +210,7 @@ export default function HowItWorks() {
       </div>
 
       {/* Benefits Section */}
-      <div className="py-20 bg-gray-50">
+      <div className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -144,9 +229,12 @@ export default function HowItWorks() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300"
               >
-                <div className="text-red-500 mb-4">{benefit.icon}</div>
+                <div className="text-red-500 mb-4 transform group-hover:scale-110 transition-transform duration-300">
+                  {benefit.icon}
+                </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{benefit.title}</h3>
                 <p className="text-gray-600">{benefit.description}</p>
               </motion.div>
@@ -156,7 +244,7 @@ export default function HowItWorks() {
       </div>
 
       {/* Steps Section */}
-      <div className="py-20">
+      <div className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -175,9 +263,10 @@ export default function HowItWorks() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow relative"
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 relative"
               >
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-red-500 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-red-500 text-white rounded-full flex items-center justify-center text-xl font-bold transform group-hover:scale-110 transition-transform duration-300">
                   {step.number}
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2 mt-4">{step.title}</h3>
