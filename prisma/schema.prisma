@@ -27,6 +27,7 @@ model Ride {
   averageSpeed  Float?
   maxSpeed      Float?
   fuelEfficiency Float?
+  score         Int?      // Genel sürüş puanı
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 } 

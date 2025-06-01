@@ -10,6 +10,7 @@ interface Ride {
   averageSpeed: number;
   maxSpeed: number;
   fuelEfficiency: number;
+  score: number;
 }
 
 export default function RidesPage() {
@@ -89,12 +90,9 @@ export default function RidesPage() {
                         minute: '2-digit',
                       })}
                     </h3>
-                    <div className="text-gray-400">
-                      Ortalama Hız: {ride.averageSpeed} km/s
-                    </div>
                   </div>
                   <div className="text-2xl font-bold text-red-500">
-                    {ride.fuelEfficiency}%
+                    {ride.score}%
                   </div>
                 </div>
               </div>

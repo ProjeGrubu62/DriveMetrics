@@ -455,7 +455,7 @@ export default function PerformancePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          score: 85, // Bu değer gerçek analiz sonucundan gelecek
+          score: overallScore,
         }),
       });
 
@@ -463,9 +463,11 @@ export default function PerformancePage() {
         throw new Error('Analiz kaydedilemedi');
       }
 
-      router.push('/rides');
+      // Başarılı kayıt sonrası detaylı hasar analizi sayfasına yönlendir
+      router.push(`/analysis/damage?driveId=${driveId}`);
     } catch (error) {
       setSaveError('Analiz kaydedilirken bir hata oluştu');
+      console.error('Kaydetme hatası:', error);
     } finally {
       setIsSaving(false);
     }
@@ -489,11 +491,60 @@ export default function PerformancePage() {
               />
             </div>
             {driveId && (
-              <Link href={`/analysis/damage?driveId=${driveId}`} passHref>
-                <button className="mt-6 px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                  Detaylı Hasar Analizini Görüntüle
-                </button>
-              </Link>
+              <div className="mt-6 flex gap-4">
+                <Link href={`/analysis/damage?driveId=${driveId}`} passHref>
+                  <button className="px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                    Detaylı Hasar Analizini Görüntüle
+                  </button>
+                </Link>
+                <Link href={`/analysis/damage?driveId=${driveId}`} passHref>
+                  <button 
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      if (!session) {
+                        router.push('/auth/login');
+                        return;
+                      }
+
+                      // Mevcut genel sürüş puanını al
+                      const currentScore = Math.round(overallScore);
+                      console.log('Kaydedilecek puan:', currentScore);
+
+                      try {
+                        // Önce kaydetme işlemini yap
+                        const response = await fetch('/api/user/rides', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            score: currentScore,
+                          }),
+                        });
+
+                        if (!response.ok) {
+                          const errorData = await response.json();
+                          console.error('Kaydetme hatası:', errorData);
+                          throw new Error(errorData.message || 'Analiz kaydedilemedi');
+                        }
+
+                        const savedRide = await response.json();
+                        console.log('Kayıt başarılı:', savedRide);
+
+                        // Başarılı kayıt sonrası yönlendir
+                        router.push(`/analysis/damage?driveId=${driveId}`);
+                      } catch (error) {
+                        console.error('Kaydetme hatası:', error);
+                        // Hata olsa bile yönlendir
+                        router.push(`/analysis/damage?driveId=${driveId}`);
+                      }
+                    }}
+                    className="px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                  >
+                    Kaydet ve Detaylı Hasar Analizini Görüntüle
+                  </button>
+                </Link>
+              </div>
             )}
           </div>
 
@@ -721,19 +772,10 @@ export default function PerformancePage() {
         </div>
       )}
 
-      {/* Kaydetme butonu */}
-      <div className="flex justify-end">
-        <button
-          onClick={handleSaveAnalysis}
-          disabled={isSaving}
-          className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSaving ? 'Kaydediliyor...' : 'Bu Analizi Kaydet'}
-        </button>
-      </div>
-
       {saveError && (
-        <div className="mt-4 text-red-400 text-center">{saveError}</div>
+        <div className="mt-4 text-red-500 text-center bg-red-50 p-3 rounded-md">
+          {saveError}
+        </div>
       )}
     </div>
   );

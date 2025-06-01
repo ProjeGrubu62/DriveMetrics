@@ -5,39 +5,50 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
   try {
+    console.log('POST /api/user/rides başladı');
+    
     const session = await getServerSession(authOptions);
+    console.log('Session:', session);
 
     if (!session?.user?.id) {
+      console.log('Oturum bulunamadı');
       return NextResponse.json(
         { message: 'Oturum açmanız gerekiyor' },
         { status: 401 }
       );
     }
 
-    const { score } = await req.json();
+    const body = await req.json();
+    console.log('Gelen veri:', body);
 
-    if (!score || typeof score !== 'number') {
+    const { score } = body;
+
+    if (typeof score !== 'number' || score < 0 || score > 100) {
+      console.log('Geçersiz puan:', score);
       return NextResponse.json(
-        { message: 'Geçerli bir puan gerekli' },
+        { message: 'Geçerli bir puan gerekli (0-100 arası)' },
         { status: 400 }
       );
     }
 
+    console.log('Veritabanına kayıt başlıyor...');
     const ride = await prisma.ride.create({
       data: {
         userId: session.user.id,
         startTime: new Date(),
-        averageSpeed: 0, // Bu değerler şimdilik 0, ileride gerçek verilerle güncellenecek
+        score: Math.round(score),
+        averageSpeed: 0,
         maxSpeed: 0,
         fuelEfficiency: 0,
       },
     });
+    console.log('Kayıt başarılı:', ride);
 
     return NextResponse.json(ride, { status: 201 });
   } catch (error) {
     console.error('Ride creation error:', error);
     return NextResponse.json(
-      { message: 'Sürüş kaydedilemedi' },
+      { message: 'Sürüş kaydedilemedi', error: error instanceof Error ? error.message : 'Bilinmeyen hata' },
       { status: 500 }
     );
   }
