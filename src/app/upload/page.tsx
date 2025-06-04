@@ -5,13 +5,26 @@ import { FaUpload, FaPlay, FaStop, FaChartLine, FaCar, FaRoad, FaCheck, FaTimes 
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
-import { generateDriveId, saveDriveData } from '../utils/performanceCalculations';
+import { generateDriveId, saveDriveData, DriveData } from '../utils/performanceCalculations';
+import { generateDrivingConditions } from '../utils/drivingConditions';
 
 // Define type for the generated drive data structure
 interface GeneratedDriveData {
     distance: number;
     driveDuration: { minutes: number; seconds: number };
     tripType: string;
+}
+
+// Tip tanımlamaları
+interface UploadCompletionData {
+    driveStartTime: string;
+    generatedDriveData: DriveData;
+    driveId: string;
+    drivingConditions: {
+        roadCondition: string;
+        weatherCondition: string;
+        trafficDensity: string;
+    };
 }
 
 export default function UploadPage() {
@@ -135,11 +148,15 @@ export default function UploadPage() {
     const newDriveId = generateDriveId();
     saveDriveData(newDriveId, realisticDriveData);
 
+    // Generate driving conditions
+    const conditions = generateDrivingConditions();
+
     // Save the generated realistic data, start time, AND driveId to localStorage
     const uploadCompletionData = {
         driveStartTime: new Date().toISOString(), // Save as ISO string
         generatedDriveData: realisticDriveData, // Save the generated realistic data
-        driveId: newDriveId // Save the generated driveId
+        driveId: newDriveId, // Save the generated driveId
+        drivingConditions: conditions // Save the driving conditions
     };
     localStorage.setItem('uploadCompletionData', JSON.stringify(uploadCompletionData));
 

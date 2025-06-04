@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { FaCar, FaExclamationTriangle, FaChartLine, FaRoad, FaTachometerAlt, FaGasPump, FaChevronRight, FaChevronLeft, FaCog, FaExclamationCircle, FaInfoCircle, FaCheckCircle, FaUser, FaClock, FaCloudRain, FaSun, FaCloud, FaSnowflake, FaWind, FaTrafficLight, FaMapMarkerAlt } from 'react-icons/fa';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { DrivingConditions } from '../utils/drivingConditions';
 
 // Import Leaflet and React-Leaflet components
 // import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
@@ -63,6 +64,7 @@ interface UploadCompletionData {
   simulatedDurationSeconds: number; // The 8 seconds from upload, not used for Analysis display duration
   generatedDriveData: GeneratedDriveAnalysisData | null;
   driveId: string | null;
+  drivingConditions: DrivingConditions | null;
 }
 
 // Analiz parametreleri ve ağırlıkları
@@ -193,13 +195,6 @@ const ANALYSIS_PARAMETERS = {
     }
   }
 };
-
-// Define type for Driving Conditions data
-interface DrivingConditions {
-  roadCondition: string;
-  weatherCondition: string;
-  trafficDensity: string;
-}
 
 // Define type for Generated Drive Analysis Data
 interface GeneratedDriveAnalysisData {
@@ -345,20 +340,31 @@ export default function AnalysisPage() {
 
     const uploadCompletionData = localStorage.getItem('uploadCompletionData');
     if (uploadCompletionData) {
-        const { driveStartTime, generatedDriveData: uploadedGeneratedData, driveId: uploadedDriveId } = JSON.parse(uploadCompletionData) as UploadCompletionData;
+        const { driveStartTime, generatedDriveData: uploadedGeneratedData, driveId: uploadedDriveId, drivingConditions: uploadedDrivingConditions } = JSON.parse(uploadCompletionData) as UploadCompletionData;
         const startTimeDate = new Date(driveStartTime);
 
-        // Use uploadedGeneratedData if available, otherwise generate new data
-        // For now, we'll always use generated data on this page for consistency
-        // const driveDataToUse = uploadedGeneratedData || generateDriveData(startTimeDate, conditions);
+        // Use uploaded data if available, otherwise generate new data
+        if (uploadedGeneratedData && uploadedDrivingConditions) {
+            setGeneratedDriveData(uploadedGeneratedData);
+            setGeneratedDrivingConditions(uploadedDrivingConditions);
+        } else {
+            // Generate driving conditions
+            const conditions = generateDrivingConditions();
+            setGeneratedDrivingConditions(conditions);
 
-        // Generate driving conditions
-        const conditions = generateDrivingConditions();
-        setGeneratedDrivingConditions(conditions);
+            // Generate drive data based on conditions and start time
+            const driveData = generateDriveData(startTimeDate, conditions);
+            setGeneratedDriveData(driveData);
 
-        // Generate drive data based on conditions and start time
-        const driveData = generateDriveData(startTimeDate, conditions);
-        setGeneratedDriveData(driveData);
+            // Save the generated data to localStorage
+            const updatedUploadCompletionData = {
+                driveStartTime,
+                generatedDriveData: driveData,
+                drivingConditions: conditions,
+                driveId: uploadedDriveId
+            };
+            localStorage.setItem('uploadCompletionData', JSON.stringify(updatedUploadCompletionData));
+        }
 
         // Set the driveId from localStorage
         setDriveId(uploadedDriveId);
@@ -368,7 +374,6 @@ export default function AnalysisPage() {
         setInitialMapPosition(startPos);
         // -----------------------------------
     }
-
   }, []); // Empty dependency array
 
   const handleNext = () => {
