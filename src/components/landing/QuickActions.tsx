@@ -13,7 +13,7 @@ export default function QuickActions() {
       title: "Geçmiş Sürüşlerim",
       description: "Tüm sürüş geçmişinizi görüntüleyin",
       color: "from-red-500 to-red-600",
-      href: "/history"
+      href: "/rides"
     },
     {
       icon: <FaUser className="w-6 h-6" />,

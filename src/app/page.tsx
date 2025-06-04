@@ -9,6 +9,6 @@ export default function Home() {
       <HeroSection />
       <FeaturesSection />
       <QuickActions />
-      </main>
+    </main>
   );
 }

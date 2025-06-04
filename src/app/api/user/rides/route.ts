@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     console.log('Gelen veri:', body);
 
-    const { score } = body;
+    const { score, driveId } = body;
 
     if (typeof score !== 'number' || score < 0 || score > 100) {
       console.log('Geçersiz puan:', score);
@@ -32,16 +32,39 @@ export async function POST(req: Request) {
     }
 
     console.log('Veritabanına kayıt başlıyor...');
-    const ride = await prisma.ride.create({
-      data: {
+    
+    // Önce mevcut sürüşü bul
+    const existingRide = await prisma.ride.findFirst({
+      where: {
         userId: session.user.id,
-        startTime: new Date(),
-        score: Math.round(score),
-        averageSpeed: 0,
-        maxSpeed: 0,
-        fuelEfficiency: 0,
-      },
+        driveId: driveId
+      }
     });
+
+    let ride;
+    if (existingRide) {
+      // Mevcut sürüşü güncelle
+      ride = await prisma.ride.update({
+        where: { id: existingRide.id },
+        data: {
+          score: Math.round(score),
+        },
+      });
+    } else {
+      // Yeni sürüş oluştur
+      ride = await prisma.ride.create({
+        data: {
+          userId: session.user.id,
+          driveId: driveId,
+          startTime: new Date(),
+          score: Math.round(score),
+          averageSpeed: 0,
+          maxSpeed: 0,
+          fuelEfficiency: 0,
+        },
+      });
+    }
+
     console.log('Kayıt başarılı:', ride);
 
     return NextResponse.json(ride, { status: 201 });

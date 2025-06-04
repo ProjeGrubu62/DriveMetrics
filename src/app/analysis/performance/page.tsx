@@ -392,7 +392,19 @@ export default function PerformancePage() {
     // Genel puanı hesapla
     const overall = calculateOverallScore(driveData);
     setOverallScore(overall);
-  }, [driveData]);
+
+    // Puanı localStorage'a kaydet
+    if (driveId) {
+      const rideData = {
+        id: driveId,
+        score: Math.round(overall),
+        startTime: new Date().toISOString(),
+        categoryScores: scores
+      };
+      localStorage.setItem(`ride_${driveId}`, JSON.stringify(rideData));
+      console.log('Puan localStorage\'a kaydedildi:', rideData);
+    }
+  }, [driveData, driveId]);
 
   useEffect(() => {
     let start = 0;
@@ -491,57 +503,10 @@ export default function PerformancePage() {
               />
             </div>
             {driveId && (
-              <div className="mt-6 flex gap-4">
+              <div className="mt-6">
                 <Link href={`/analysis/damage?driveId=${driveId}`} passHref>
                   <button className="px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
                     Detaylı Hasar Analizini Görüntüle
-                  </button>
-                </Link>
-                <Link href={`/analysis/damage?driveId=${driveId}`} passHref>
-                  <button 
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      if (!session) {
-                        router.push('/auth/login');
-                        return;
-                      }
-
-                      // Mevcut genel sürüş puanını al
-                      const currentScore = Math.round(overallScore);
-                      console.log('Kaydedilecek puan:', currentScore);
-
-                      try {
-                        // Önce kaydetme işlemini yap
-                        const response = await fetch('/api/user/rides', {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({
-                            score: currentScore,
-                          }),
-                        });
-
-                        if (!response.ok) {
-                          const errorData = await response.json();
-                          console.error('Kaydetme hatası:', errorData);
-                          throw new Error(errorData.message || 'Analiz kaydedilemedi');
-                        }
-
-                        const savedRide = await response.json();
-                        console.log('Kayıt başarılı:', savedRide);
-
-                        // Başarılı kayıt sonrası yönlendir
-                        router.push(`/analysis/damage?driveId=${driveId}`);
-                      } catch (error) {
-                        console.error('Kaydetme hatası:', error);
-                        // Hata olsa bile yönlendir
-                        router.push(`/analysis/damage?driveId=${driveId}`);
-                      }
-                    }}
-                    className="px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                  >
-                    Kaydet ve Detaylı Hasar Analizini Görüntüle
                   </button>
                 </Link>
               </div>
