@@ -504,11 +504,12 @@ export default function PerformancePage() {
             </div>
             {driveId && (
               <div className="mt-6">
-                <Link href={`/analysis/damage?driveId=${driveId}`} passHref>
-                  <button className="px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                    Detaylı Hasar Analizini Görüntüle
-                  </button>
-                </Link>
+                <button
+                  onClick={() => router.push(`/analysis/damage?driveId=${driveId}`)}
+                  className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg hover:shadow-lg transition-all duration-300"
+                >
+                  Detaylı Hasar Analizini Görüntüle
+                </button>
               </div>
             )}
           </div>

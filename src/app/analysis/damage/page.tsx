@@ -300,6 +300,20 @@ export default function DamageAnalysisPage() {
             </li>
           </ul>
         </div>
+
+        {/* Sonraki Sayfa Butonu */}
+        <div className="flex justify-center mt-8 mb-8">
+          {searchParams.get('driveId') && (
+            <div className="mt-6">
+              <button
+                onClick={() => router.push(`/analysis/finalscreen?driveId=${searchParams.get('driveId')}`)}
+                className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg hover:shadow-lg transition-all duration-300"
+              >
+                Sürüş Analizini Tamamla
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

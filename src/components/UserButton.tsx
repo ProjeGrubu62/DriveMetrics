@@ -27,6 +27,12 @@ export function UserButton({ user }: UserButtonProps) {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-10">
           <Link
+            href="/"
+            className="block px-4 py-2 text-sm text-gray-300 hover:bg-red-600 hover:text-white"
+          >
+            Ana Sayfa
+          </Link>
+          <Link
             href="/profile"
             className="block px-4 py-2 text-sm text-gray-300 hover:bg-red-600 hover:text-white"
           >

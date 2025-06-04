@@ -103,19 +103,19 @@ export default function RidesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-white to-gray-100 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Sürüş Geçmişi</h1>
+        <h1 className="text-3xl font-bold text-red-700 mb-8">Sürüş Geçmişi</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {rides.map((ride) => (
             <div
               key={ride.id}
-              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-red-100"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-black">
                     {formatDate(ride.startTime)}
                   </h3>
                 </div>
