@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { FaCar, FaChartLine, FaRoad } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const rotatingTexts = [
   "Arabanızı ne kadar iyi kullanıyorsunuz!",
@@ -28,12 +30,23 @@ const rotatingTexts = [
 ];
 
 export default function HeroSection() {
+  const { data: session } = useSession();
+  const router = useRouter();
   const [index, setIndex] = useState(0);
+
+  const handleStartClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!session) {
+      router.push('/auth/login');
+    } else {
+      router.push('/vehicle-info');
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prevIndex) => (prevIndex + 1) % rotatingTexts.length);
-    }, 5000); // Her 5 saniyede bir değişir
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -83,12 +96,12 @@ export default function HeroSection() {
               className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start"
             >
               <div className="rounded-md shadow">
-                <Link
-                  href="/vehicle-info"
+                <button
+                  onClick={handleStartClick}
                   className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 md:py-4 md:text-lg md:px-10"
                 >
                   Hemen Başla
-                </Link>
+                </button>
               </div>
               <div className="mt-3 sm:mt-0 sm:ml-3">
                 <Link
